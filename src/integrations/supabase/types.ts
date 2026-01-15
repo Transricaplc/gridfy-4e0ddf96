@@ -269,6 +269,57 @@ export type Database = {
         }
         Relationships: []
       }
+      running_routes: {
+        Row: {
+          coordinates_lat: number | null
+          coordinates_lng: number | null
+          created_at: string
+          difficulty: string
+          distance_km: number
+          has_water_stations: boolean | null
+          id: string
+          is_lit: boolean | null
+          is_open: boolean | null
+          location: string
+          name: string
+          notes: string | null
+          safety_rating: number | null
+          terrain: string
+        }
+        Insert: {
+          coordinates_lat?: number | null
+          coordinates_lng?: number | null
+          created_at?: string
+          difficulty?: string
+          distance_km: number
+          has_water_stations?: boolean | null
+          id?: string
+          is_lit?: boolean | null
+          is_open?: boolean | null
+          location: string
+          name: string
+          notes?: string | null
+          safety_rating?: number | null
+          terrain?: string
+        }
+        Update: {
+          coordinates_lat?: number | null
+          coordinates_lng?: number | null
+          created_at?: string
+          difficulty?: string
+          distance_km?: number
+          has_water_stations?: boolean | null
+          id?: string
+          is_lit?: boolean | null
+          is_open?: boolean | null
+          location?: string
+          name?: string
+          notes?: string | null
+          safety_rating?: number | null
+          terrain?: string
+        }
+        Relationships: []
+      }
       suburb_intelligence: {
         Row: {
           area_code: string
