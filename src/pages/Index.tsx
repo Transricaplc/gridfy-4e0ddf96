@@ -1,199 +1,51 @@
 import { useState } from 'react';
 import Header from '@/components/dashboard/Header';
-import StatsBar from '@/components/dashboard/StatsBar';
-import TabNavigation from '@/components/dashboard/TabNavigation';
-import RouteCard from '@/components/dashboard/RouteCard';
-import RouteDetail from '@/components/dashboard/RouteDetail';
-import TrainCard from '@/components/dashboard/TrainCard';
-import UberZoneCard from '@/components/dashboard/UberZoneCard';
-import EmptyState from '@/components/dashboard/EmptyState';
-import EmergencyPanel from '@/components/dashboard/EmergencyPanel';
-import AreaSearch from '@/components/dashboard/AreaSearch';
-import InfrastructureGrid from '@/components/dashboard/InfrastructureGrid';
-import PremiumPanel from '@/components/dashboard/PremiumPanel';
-import RoadsStatusPanel from '@/components/dashboard/RoadsStatusPanel';
 import InteractiveMap from '@/components/dashboard/InteractiveMap';
-import ComparisonView from '@/components/dashboard/ComparisonView';
-import ExportPanel from '@/components/dashboard/ExportPanel';
-import AdditionalEmergencyContacts from '@/components/dashboard/AdditionalEmergencyContacts';
-import BeachSafetyPanel from '@/components/dashboard/BeachSafetyPanel';
-import TouristProtocolsPanel from '@/components/dashboard/TouristProtocolsPanel';
+import IntelligenceSidebar from '@/components/dashboard/IntelligenceSidebar';
+import SOSActionDock from '@/components/dashboard/SOSActionDock';
+import TravelerModeView from '@/components/dashboard/TravelerModeView';
 import LegalComplianceFooter from '@/components/dashboard/LegalComplianceFooter';
-import { majorRoutes, trainRoutes, uberDangerZones } from '@/data/dashboardData';
-import { MajorRoute, TabId } from '@/types/dashboard';
 
 const Index = () => {
-  const [selectedRoute, setSelectedRoute] = useState<MajorRoute | null>(null);
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [isTravelerMode, setIsTravelerMode] = useState(false);
 
-  const handleTabChange = (tab: TabId) => {
-    setActiveTab(tab);
-    if (tab !== 'routes') {
-      setSelectedRoute(null);
-    }
-  };
-
-  const handleRouteClick = (route: MajorRoute) => {
-    setSelectedRoute(route);
-    setActiveTab('routes');
+  const handleToggleTravelerMode = () => {
+    setIsTravelerMode(!isTravelerMode);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-body">
-      <Header />
-      <StatsBar />
-      <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
+    <div className="min-h-screen bg-black">
+      <Header 
+        isTravelerMode={isTravelerMode} 
+        onToggleTravelerMode={handleToggleTravelerMode} 
+      />
 
-      <main className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
-              {/* Route Cards */}
-              <div className="xl:col-span-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
-                  {majorRoutes.map((route, index) => (
-                    <div key={route.id} style={{ animationDelay: `${index * 50}ms` }}>
-                      <RouteCard route={route} onClick={() => handleRouteClick(route)} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sidebar */}
-              <div className="xl:col-span-1 space-y-4 lg:space-y-5">
-                <PremiumPanel />
-                <AreaSearch />
-                <EmergencyPanel />
-              </div>
+      {isTravelerMode ? (
+        /* Traveler's Mode - Simplified Emergency View */
+        <TravelerModeView />
+      ) : (
+        /* Command Center Mode - Full Dashboard */
+        <main className="max-w-[2000px] mx-auto px-4 py-4 pb-36">
+          {/* 12-Column Grid Layout */}
+          <div className="grid grid-cols-12 gap-4 lg:gap-6" style={{ height: 'calc(100vh - 200px)' }}>
+            {/* Map - Cols 1-9 */}
+            <div className="col-span-12 xl:col-span-9">
+              <InteractiveMap fullHeight />
             </div>
 
-            {/* Roads Status */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-              <RoadsStatusPanel />
-              <ExportPanel />
+            {/* Intelligence Sidebar - Cols 10-12 */}
+            <div className="col-span-12 xl:col-span-3 h-full">
+              <IntelligenceSidebar />
             </div>
           </div>
-        )}
+        </main>
+      )}
 
-        {activeTab === 'map' && (
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
-            <div className="xl:col-span-3">
-              <InteractiveMap />
-            </div>
-            <div className="xl:col-span-1 space-y-4 lg:space-y-5">
-              <AreaSearch />
-              <EmergencyPanel />
-            </div>
-          </div>
-        )}
+      {/* SOS Action Dock - Always visible */}
+      <SOSActionDock isTravelerMode={isTravelerMode} />
 
-        {activeTab === 'routes' && selectedRoute && (
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
-            <div className="xl:col-span-3">
-              <RouteDetail route={selectedRoute} />
-            </div>
-            <div className="xl:col-span-1 space-y-4 lg:space-y-5">
-              <RoadsStatusPanel />
-              <EmergencyPanel />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'routes' && !selectedRoute && (
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
-            <div className="xl:col-span-3">
-              <EmptyState />
-            </div>
-            <div className="xl:col-span-1 space-y-4 lg:space-y-5">
-              <RoadsStatusPanel />
-              <EmergencyPanel />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'trains' && (
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
-            <div className="xl:col-span-3">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-                {trainRoutes.map((train, index) => (
-                  <div key={train.id} style={{ animationDelay: `${index * 50}ms` }}>
-                    <TrainCard train={train} />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="xl:col-span-1 space-y-4 lg:space-y-5">
-              <AreaSearch />
-              <EmergencyPanel />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'uber' && (
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
-            <div className="xl:col-span-3">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-                {uberDangerZones.map((zone, index) => (
-                  <div key={zone.id} style={{ animationDelay: `${index * 50}ms` }}>
-                    <UberZoneCard zone={zone} />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="xl:col-span-1 space-y-4 lg:space-y-5">
-              <AreaSearch />
-              <EmergencyPanel />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            <ComparisonView />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-              <RoadsStatusPanel />
-              <ExportPanel />
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Infrastructure Grid */}
-      <InfrastructureGrid />
-
-      {/* Beach & Tourist Safety */}
-      <div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-          <BeachSafetyPanel />
-          <TouristProtocolsPanel />
-          <AdditionalEmergencyContacts />
-        </div>
-      </div>
-
-      {/* Legal Compliance Footer */}
-      <LegalComplianceFooter />
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-card/50">
-        <div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-primary">SAFESYNC</span>
-              <span>© 2024 Real-time urban intelligence for Western Cape</span>
-            </div>
-            <div className="flex items-center gap-4 font-mono text-[10px]">
-              <span>SAPS: <span className="font-bold text-red-400">10111</span></span>
-              <span>•</span>
-              <span>AMBULANCE: <span className="font-bold text-blue-400">10177</span></span>
-              <span>•</span>
-              <span>FIRE: <span className="font-bold text-orange-400">021 480 7700</span></span>
-              <span>•</span>
-              <span>NSRI: <span className="font-bold text-cyan-400">087 094 9774</span></span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Legal Footer (Command Center only) */}
+      {!isTravelerMode && <LegalComplianceFooter />}
     </div>
   );
 };

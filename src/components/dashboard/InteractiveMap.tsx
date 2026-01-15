@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import { 
   Layers, Camera, TrafficCone, AlertTriangle, 
   MapPin, ZoomIn, ZoomOut, Locate, Filter,
-  Eye, EyeOff, Search, X
+  Eye, EyeOff, Search, X, Bike
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -22,23 +22,25 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-// Custom icons
-const createIcon = (color: string, type: string) => {
+// Custom icons with tactical glow
+const createIcon = (color: string, type: string, glow: boolean = false) => {
+  const glowStyle = glow ? `filter: drop-shadow(0 0 8px ${color});` : '';
   const iconHtml = `
     <div style="
       background: ${color};
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      border: 2px solid white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.8);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
       display: flex;
       align-items: center;
       justify-content: center;
+      ${glowStyle}
     ">
       <div style="
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
         background: white;
         border-radius: 50%;
       "></div>
@@ -48,15 +50,28 @@ const createIcon = (color: string, type: string) => {
   return L.divIcon({
     html: iconHtml,
     className: 'custom-marker',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   });
 };
 
-const cctvIcon = createIcon('#3b82f6', 'cctv');
-const trafficIcon = createIcon('#22c55e', 'traffic');
-const riskIcon = createIcon('#ef4444', 'risk');
-const hotspotIcon = createIcon('#f97316', 'hotspot');
+const cctvIcon = createIcon('#3b82f6', 'cctv', true);
+const trafficIcon = createIcon('#22c55e', 'traffic', true);
+const riskIcon = createIcon('#ef4444', 'risk', true);
+const hotspotIcon = createIcon('#f97316', 'hotspot', true);
+
+// Pickpocket zones (CBD area)
+const pickpocketZones = [
+  { center: [-33.9215, 18.4239] as [number, number], radius: 200, name: 'Grand Parade' },
+  { center: [-33.9180, 18.4250] as [number, number], radius: 150, name: 'Long Street' },
+  { center: [-33.9205, 18.4180] as [number, number], radius: 180, name: 'Station Area' },
+];
+
+// Cycle lanes
+const cycleLanes = [
+  { positions: [[-33.9285, 18.4120], [-33.9350, 18.4150], [-33.9420, 18.4200]] as [number, number][], name: 'Sea Point Promenade' },
+  { positions: [[-33.9050, 18.4180], [-33.9100, 18.4200], [-33.9150, 18.4210]] as [number, number][], name: 'Green Point Cycle Path' },
+];
 
 // Map Controls Component
 const MapControls = () => {
@@ -66,19 +81,19 @@ const MapControls = () => {
     <div className="absolute right-4 top-4 z-[1000] flex flex-col gap-2">
       <button 
         onClick={() => map.zoomIn()}
-        className="p-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg hover:bg-card transition-colors"
+        className="p-2.5 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg hover:bg-card transition-colors hover:border-primary/50"
       >
         <ZoomIn className="w-4 h-4" />
       </button>
       <button 
         onClick={() => map.zoomOut()}
-        className="p-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg hover:bg-card transition-colors"
+        className="p-2.5 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg hover:bg-card transition-colors hover:border-primary/50"
       >
         <ZoomOut className="w-4 h-4" />
       </button>
       <button 
         onClick={() => map.setView(MAP_CENTER, MAP_ZOOM)}
-        className="p-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg hover:bg-card transition-colors"
+        className="p-2.5 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg hover:bg-card transition-colors hover:border-primary/50"
       >
         <Locate className="w-4 h-4" />
       </button>
@@ -94,16 +109,20 @@ interface LayerToggle {
   enabled: boolean;
 }
 
-const InteractiveMap = () => {
+interface InteractiveMapProps {
+  fullHeight?: boolean;
+}
+
+const InteractiveMap = ({ fullHeight = false }: InteractiveMapProps) => {
   const [layers, setLayers] = useState<LayerToggle[]>([
     { id: 'cctv', name: 'CCTV Cameras', icon: Camera, color: '#3b82f6', enabled: true },
     { id: 'traffic', name: 'Traffic Lights', icon: TrafficCone, color: '#22c55e', enabled: true },
-    { id: 'risk', name: 'High-Risk Zones', icon: AlertTriangle, color: '#ef4444', enabled: true },
+    { id: 'risk', name: 'Pickpocket Zones', icon: AlertTriangle, color: '#ef4444', enabled: true },
     { id: 'hotspots', name: 'Accident Hotspots', icon: MapPin, color: '#f97316', enabled: false },
+    { id: 'cycling', name: 'Cycle Lanes', icon: Bike, color: '#10b981', enabled: true },
   ]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null);
 
   const toggleLayer = (id: string) => {
     setLayers(prev => prev.map(l => 
@@ -132,7 +151,7 @@ const InteractiveMap = () => {
   };
 
   const allMarkers = layers
-    .filter(l => l.enabled)
+    .filter(l => l.enabled && l.id !== 'cycling')
     .flatMap(l => getMarkersByType(l.id));
 
   const filteredMarkers = searchQuery 
@@ -142,20 +161,29 @@ const InteractiveMap = () => {
       )
     : allMarkers;
 
+  const showPickpocketZones = layers.find(l => l.id === 'risk')?.enabled;
+  const showCycleLanes = layers.find(l => l.id === 'cycling')?.enabled;
+
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className={cn(
+      "bg-card/50 backdrop-blur-sm rounded-xl border-2 border-primary/30 overflow-hidden shadow-xl shadow-primary/10",
+      fullHeight && "h-full"
+    )}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary/20 to-primary/10 px-4 py-3 border-b border-border">
+      <div className="bg-gradient-to-r from-primary/20 to-transparent px-4 py-2.5 border-b border-primary/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Layers className="w-5 h-5 text-primary" />
-            <h3 className="font-bold text-foreground">Interactive Map</h3>
+            <h3 className="font-bold text-foreground text-sm">Situational Map</h3>
+            <span className="text-[10px] font-mono text-muted-foreground px-2 py-0.5 bg-background/50 rounded">
+              {filteredMarkers.length} markers
+            </span>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'p-2 rounded-lg transition-colors',
-              showFilters ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
+              showFilters ? 'bg-primary text-primary-foreground' : 'bg-background/50 hover:bg-background'
             )}
           >
             <Filter className="w-4 h-4" />
@@ -165,7 +193,7 @@ const InteractiveMap = () => {
 
       {/* Search & Layer Controls */}
       {showFilters && (
-        <div className="p-3 border-b border-border space-y-3 animate-fade-in">
+        <div className="p-3 border-b border-border/50 space-y-3 animate-fade-in bg-background/30">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -174,7 +202,7 @@ const InteractiveMap = () => {
               placeholder="Search locations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-9 py-2 bg-background/50 border border-border rounded-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full pl-9 pr-9 py-2 bg-card/50 border border-border rounded-lg text-sm font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
             />
             {searchQuery && (
               <button 
@@ -187,7 +215,7 @@ const InteractiveMap = () => {
           </div>
 
           {/* Layer Toggles */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
             {layers.map(layer => {
               const Icon = layer.icon;
               return (
@@ -197,13 +225,18 @@ const InteractiveMap = () => {
                   className={cn(
                     'flex items-center gap-2 p-2 rounded-lg border transition-all',
                     layer.enabled 
-                      ? 'bg-primary/10 border-primary/50 text-foreground'
-                      : 'bg-background/50 border-border text-muted-foreground hover:border-primary/30'
+                      ? 'bg-primary/10 border-primary/50 text-foreground shadow-md'
+                      : 'bg-card/30 border-border/50 text-muted-foreground hover:border-primary/30'
                   )}
+                  style={layer.enabled ? { boxShadow: `0 0 12px ${layer.color}30` } : {}}
                 >
                   <div 
                     className="w-6 h-6 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: layer.enabled ? layer.color : 'transparent', border: `2px solid ${layer.color}` }}
+                    style={{ 
+                      backgroundColor: layer.enabled ? layer.color : 'transparent', 
+                      border: `2px solid ${layer.color}`,
+                      boxShadow: layer.enabled ? `0 0 8px ${layer.color}` : 'none'
+                    }}
                   >
                     <Icon className="w-3 h-3" style={{ color: layer.enabled ? 'white' : layer.color }} />
                   </div>
@@ -217,7 +250,10 @@ const InteractiveMap = () => {
       )}
 
       {/* Map Container */}
-      <div className="relative h-[400px]">
+      <div className={cn(
+        "relative",
+        fullHeight ? "h-[calc(100%-52px)]" : "h-[500px]"
+      )}>
         <MapContainer
           center={MAP_CENTER}
           zoom={MAP_ZOOM}
@@ -226,9 +262,54 @@ const InteractiveMap = () => {
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
           
+          {/* Pickpocket Zones - Pulsing Orange */}
+          {showPickpocketZones && pickpocketZones.map((zone, idx) => (
+            <Circle
+              key={`pickpocket-${idx}`}
+              center={zone.center}
+              radius={zone.radius}
+              pathOptions={{
+                color: '#f97316',
+                fillColor: '#f97316',
+                fillOpacity: 0.2,
+                weight: 2,
+                className: 'animate-pulse'
+              }}
+            >
+              <Popup>
+                <div className="p-2">
+                  <div className="font-bold text-sm text-orange-600">⚠️ {zone.name}</div>
+                  <div className="text-xs text-gray-600">High pickpocket activity</div>
+                </div>
+              </Popup>
+            </Circle>
+          ))}
+
+          {/* Cycle Lanes - Green Lines */}
+          {showCycleLanes && cycleLanes.map((lane, idx) => (
+            <Polyline
+              key={`cycle-${idx}`}
+              positions={lane.positions}
+              pathOptions={{
+                color: '#10b981',
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '10, 10'
+              }}
+            >
+              <Popup>
+                <div className="p-2">
+                  <div className="font-bold text-sm text-emerald-600">🚴 {lane.name}</div>
+                  <div className="text-xs text-gray-600">Safe cycling corridor</div>
+                </div>
+              </Popup>
+            </Polyline>
+          ))}
+          
+          {/* Markers */}
           {filteredMarkers.map(marker => (
             <Marker
               key={marker.id}
@@ -242,9 +323,9 @@ const InteractiveMap = () => {
                   {marker.status && (
                     <div className={cn(
                       'inline-block px-2 py-0.5 rounded-full text-[10px] font-medium mt-2',
-                      marker.status === 'operational' ? 'bg-safety-good/20 text-safety-good' :
-                      marker.status === 'faulty' ? 'bg-safety-moderate/20 text-safety-moderate' :
-                      'bg-safety-critical/20 text-safety-critical'
+                      marker.status === 'operational' ? 'bg-emerald-100 text-emerald-700' :
+                      marker.status === 'faulty' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
                     )}>
                       {marker.status.toUpperCase()}
                     </div>
@@ -264,18 +345,18 @@ const InteractiveMap = () => {
       </div>
 
       {/* Legend */}
-      <div className="px-4 py-2 bg-background/30 border-t border-border flex items-center justify-between text-[10px]">
+      <div className="px-4 py-2 bg-black/50 border-t border-border/50 flex items-center justify-between text-[10px]">
         <div className="flex items-center gap-3">
           {layers.filter(l => l.enabled).map(layer => (
             <span key={layer.id} className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: layer.color }} />
-              <span className="text-muted-foreground">{layer.name}</span>
+              <div 
+                className="w-2 h-2 rounded-full" 
+                style={{ backgroundColor: layer.color, boxShadow: `0 0 6px ${layer.color}` }} 
+              />
+              <span className="text-muted-foreground font-mono">{layer.name}</span>
             </span>
           ))}
         </div>
-        <span className="font-mono text-muted-foreground">
-          {filteredMarkers.length} markers
-        </span>
       </div>
     </div>
   );
