@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, MapPin, X, ChevronDown, ChevronUp, Mountain, Loader2, Droplet, Zap, Cloud, Plane, Waves, FileWarning } from 'lucide-react';
+import { Search, MapPin, X, Mountain, Loader2, Waves, FileWarning } from 'lucide-react';
 import { useSuburbIntelligence, SuburbIntelligence, getSafetyColor } from '@/hooks/useSuburbIntelligence';
 import SectorReport from './SectorReport';
 import TouristProtocolsPanel from './TouristProtocolsPanel';
@@ -20,7 +20,6 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSuburb, setSelectedSuburb] = useState<SuburbIntelligence | null>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [showGuidelines, setShowGuidelines] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
 
   const filteredSuburbs = useMemo(() => {

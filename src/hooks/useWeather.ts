@@ -39,9 +39,9 @@ export const useWeather = (): UseWeatherReturn => {
         .eq('location', 'Cape Town')
         .order('last_updated', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+      if (fetchError) throw fetchError;
 
       setWeather(data as WeatherData || null);
     } catch (err) {
