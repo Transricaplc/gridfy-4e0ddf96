@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import CitizenReportModal from './CitizenReportModal';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface HeaderProps {
   isTravelerMode: boolean;
@@ -161,6 +162,9 @@ const Header = ({ isTravelerMode, onToggleTravelerMode }: HeaderProps) => {
                 )}
               </button>
             )}
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {/* Settings (Command Center Only) */}
             {!isTravelerMode && (
