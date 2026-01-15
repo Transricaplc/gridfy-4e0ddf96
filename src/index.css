@@ -8,7 +8,7 @@
 
 @layer base {
   :root {
-    /* Pure black / deep midnight background */
+    /* Pure black / deep midnight background - Dark Mode (Dim) */
     --background: 220 50% 3%;
     --foreground: 210 40% 98%;
 
@@ -64,6 +64,62 @@
     --sidebar-ring: 217 91% 60%;
   }
 
+  /* Light Mode - Professional Clean */
+  .light {
+    --background: 210 40% 98%;
+    --foreground: 220 50% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 50% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 50% 10%;
+
+    /* Primary - Electric Blue */
+    --primary: 217 91% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 215 25% 92%;
+    --secondary-foreground: 220 50% 10%;
+
+    --muted: 215 25% 92%;
+    --muted-foreground: 215 20% 45%;
+
+    --accent: 217 91% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 25% 85%;
+    --input: 217 25% 85%;
+    --ring: 217 91% 50%;
+
+    /* Safety colors - adjusted for light mode */
+    --safety-good: 160 84% 35%;
+    --safety-moderate: 38 92% 45%;
+    --safety-poor: 25 95% 48%;
+    --safety-critical: 0 84% 55%;
+
+    /* Tactical glow effects - softer for light mode */
+    --glow-blue: 0 0 15px hsl(217 91% 50% / 0.25);
+    --glow-green: 0 0 15px hsl(160 84% 35% / 0.25);
+    --glow-red: 0 0 15px hsl(0 84% 55% / 0.25);
+    --glow-amber: 0 0 15px hsl(38 92% 45% / 0.25);
+    
+    /* Sidebar */
+    --sidebar-background: 215 25% 96%;
+    --sidebar-foreground: 220 50% 10%;
+    --sidebar-primary: 217 91% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 90%;
+    --sidebar-accent-foreground: 220 50% 10%;
+    --sidebar-border: 217 25% 85%;
+    --sidebar-ring: 217 91% 50%;
+  }
+
+  /* Dark Mode (Dim) - Command Center */
   .dark {
     --background: 220 50% 3%;
     --foreground: 210 40% 98%;
@@ -103,7 +159,16 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  .dark body,
+  body:has(.dark) {
     background: linear-gradient(180deg, hsl(220 50% 2%) 0%, hsl(220 45% 4%) 50%, hsl(220 50% 2%) 100%);
+  }
+
+  .light body,
+  body:has(.light) {
+    background: linear-gradient(180deg, hsl(210 40% 98%) 0%, hsl(215 25% 95%) 50%, hsl(210 40% 98%) 100%);
   }
 }
 
@@ -113,18 +178,23 @@
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 
-  /* Gradient backgrounds - military grade */
+  /* Gradient backgrounds - theme aware */
   .bg-gradient-header {
-    background: linear-gradient(135deg, hsl(225 55% 12%) 0%, hsl(220 60% 8%) 50%, hsl(225 55% 12%) 100%);
-    border-bottom: 1px solid hsl(217 91% 60% / 0.3);
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background)) 50%, hsl(var(--card)) 100%);
+    border-bottom: 1px solid hsl(var(--primary) / 0.3);
+  }
+
+  .light .bg-gradient-header {
+    background: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(215 25% 98%) 50%, hsl(0 0% 100%) 100%);
+    box-shadow: 0 1px 3px hsl(220 50% 10% / 0.1);
   }
 
   .bg-gradient-stats {
-    background: linear-gradient(135deg, hsl(220 45% 8%) 0%, hsl(220 40% 5%) 50%, hsl(220 45% 8%) 100%);
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background)) 50%, hsl(var(--card)) 100%);
   }
 
   .bg-gradient-body {
-    background: linear-gradient(180deg, hsl(220 50% 2%) 0%, hsl(220 45% 4%) 50%, hsl(220 50% 2%) 100%);
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--card)) 50%, hsl(var(--background)) 100%);
   }
 
   /* Stat card gradients with tactical glow */
