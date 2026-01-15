@@ -37,9 +37,9 @@ export const useLoadshedding = (): UseLoadsheddingReturn => {
         .select('*')
         .order('last_updated', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+      if (fetchError) throw fetchError;
 
       setStatus(data as LoadsheddingStatus || null);
     } catch (err) {
