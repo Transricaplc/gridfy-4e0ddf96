@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronUp, ChevronDown, Car, Train, Route, Mountain, Bike, Dog } from 'lucide-react';
+import { ChevronUp, ChevronDown, Car, Train, Route, Mountain, Bike, Dog, Plane, PersonStanding } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import RoadsStatusPanel from './RoadsStatusPanel';
 import TrainCard from './TrainCard';
@@ -7,9 +7,11 @@ import UberZoneCard from './UberZoneCard';
 import HikingTrailsPanel from './HikingTrailsPanel';
 import CyclingRoutesPanel from './CyclingRoutesPanel';
 import PetFriendlyZonesPanel from './PetFriendlyZonesPanel';
+import FlightStatusPanel from './FlightStatusPanel';
+import RunningRoutesPanel from './RunningRoutesPanel';
 import { trainRoutes, uberDangerZones } from '@/data/dashboardData';
 
-type TabId = 'roads' | 'trains' | 'rideshare' | 'hiking' | 'cycling' | 'pets';
+type TabId = 'roads' | 'trains' | 'rideshare' | 'flights' | 'hiking' | 'running' | 'cycling' | 'pets';
 
 interface TabConfig {
   id: TabId;
@@ -21,7 +23,9 @@ const tabs: TabConfig[] = [
   { id: 'roads', label: 'Roads', icon: Route },
   { id: 'trains', label: 'Rail', icon: Train },
   { id: 'rideshare', label: 'Rideshare', icon: Car },
+  { id: 'flights', label: 'Flights', icon: Plane },
   { id: 'hiking', label: 'Trails', icon: Mountain },
+  { id: 'running', label: 'Running', icon: PersonStanding },
   { id: 'cycling', label: 'Cycling', icon: Bike },
   { id: 'pets', label: 'Canine', icon: Dog },
 ];
@@ -50,8 +54,12 @@ const MobilityTray = () => {
             ))}
           </div>
         );
+      case 'flights':
+        return <FlightStatusPanel />;
       case 'hiking':
         return <HikingTrailsPanel />;
+      case 'running':
+        return <RunningRoutesPanel />;
       case 'cycling':
         return <CyclingRoutesPanel />;
       case 'pets':
