@@ -3,7 +3,6 @@ import InteractiveMap from '@/components/dashboard/InteractiveMap';
 import IntelligenceSidebar from '@/components/dashboard/IntelligenceSidebar';
 import SOSActionDock from '@/components/dashboard/SOSActionDock';
 import TravelerModeView from '@/components/dashboard/TravelerModeView';
-import LegalComplianceFooter from '@/components/dashboard/LegalComplianceFooter';
 import MobilityTray from '@/components/dashboard/MobilityTray';
 import GlobalStatusBar from '@/components/dashboard/GlobalStatusBar';
 import ContextPanel from '@/components/dashboard/ContextPanel';
@@ -34,7 +33,7 @@ const DashboardContent = () => {
       ) : (
         /* Command Center Mode - Full Dashboard */
         <>
-          <main className="flex-1 max-w-[2000px] w-full mx-auto px-3 py-3">
+          <main className="flex-1 max-w-[2000px] w-full mx-auto px-3 py-3 pb-16">
             {/* Level 2: Spatial Awareness - Primary Workspace */}
             <div className={cn(
               "grid gap-3 lg:gap-4 h-[calc(100vh-180px)] transition-all duration-300",
@@ -71,15 +70,10 @@ const DashboardContent = () => {
               </div>
             </div>
           </main>
-
-          {/* Legal Footer */}
-          <div className="flex-shrink-0 mt-auto">
-            <LegalComplianceFooter />
-          </div>
         </>
       )}
 
-      {/* SOS Action Dock - Always visible */}
+      {/* SOS Action Dock with Legal/Compliance - Always visible at bottom */}
       <SOSActionDock isTravelerMode={isTravelerMode} />
 
       {/* Level 3: Context Panel - Slide-in detail view */}
