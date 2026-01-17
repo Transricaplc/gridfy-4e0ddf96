@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Polyline } from 'react-leaflet';
+import { useState, useEffect, useCallback } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, Polyline, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { 
   Layers, Camera, TrafficCone, AlertTriangle, 
@@ -12,6 +12,7 @@ import {
   cctvMarkers, trafficLightMarkers, highRiskMarkers, accidentHotspots,
   MapMarker
 } from '@/data/mapData';
+import { useDashboard } from '@/contexts/DashboardContext';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers
@@ -129,6 +130,8 @@ interface InteractiveMapProps {
 }
 
 const InteractiveMap = ({ fullHeight = false }: InteractiveMapProps) => {
+  const { selectEntity, selectedEntity, mapFilters, searchQuery, setSearchQuery } = useDashboard();
+  
   const [layers, setLayers] = useState<LayerToggle[]>([
     { id: 'cctv', name: 'CCTV Cameras', icon: Camera, color: '#3b82f6', enabled: true },
     { id: 'traffic', name: 'Traffic Lights', icon: TrafficCone, color: '#22c55e', enabled: true },
@@ -138,11 +141,28 @@ const InteractiveMap = ({ fullHeight = false }: InteractiveMapProps) => {
     { id: 'hiking', name: 'Hiking Trails', icon: MapPin, color: '#92400e', enabled: true },
     { id: 'pedestrian', name: 'Safe Pedestrian', icon: MapPin, color: '#3b82f6', enabled: true },
   ]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
+  // Handle marker click - propagate to context
+  const handleMarkerClick = useCallback((marker: MapMarker) => {
+    selectEntity({
+      id: marker.id,
+      type: marker.type === 'cctv' ? 'cctv' : 
+            marker.type === 'traffic_light' ? 'traffic_signal' : 
+            marker.type === 'high_risk' ? 'incident' : 'infrastructure',
+      name: marker.name,
+      coordinates: { lat: marker.lat, lng: marker.lng },
+      data: {
+        area: marker.area,
+        status: marker.status,
+        lastInspection: marker.lastInspection,
+      },
+    });
+  }, [selectEntity]);
+
   const toggleLayer = (id: string) => {
-    setLayers(prev => prev.map(l => 
+    setLayers(prev => prev.map(l =>
       l.id === id ? { ...l, enabled: !l.enabled } : l
     ));
   };
@@ -171,10 +191,10 @@ const InteractiveMap = ({ fullHeight = false }: InteractiveMapProps) => {
     .filter(l => l.enabled && !['cycling', 'hiking', 'pedestrian'].includes(l.id))
     .flatMap(l => getMarkersByType(l.id));
 
-  const filteredMarkers = searchQuery 
+  const filteredMarkers = localSearchQuery 
     ? allMarkers.filter(m => 
-        m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.area.toLowerCase().includes(searchQuery.toLowerCase())
+        m.name.toLowerCase().includes(localSearchQuery.toLowerCase()) ||
+        m.area.toLowerCase().includes(localSearchQuery.toLowerCase())
       )
     : allMarkers;
 
@@ -219,13 +239,13 @@ const InteractiveMap = ({ fullHeight = false }: InteractiveMapProps) => {
             <input
               type="text"
               placeholder="Search locations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={localSearchQuery}
+              onChange={(e) => setLocalSearchQuery(e.target.value)}
               className="w-full pl-9 pr-9 py-2 bg-card/50 border border-border rounded-lg text-sm font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
             />
-            {searchQuery && (
+            {localSearchQuery && (
               <button 
-                onClick={() => setSearchQuery('')}
+                onClick={() => setLocalSearchQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2"
               >
                 <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
@@ -369,12 +389,15 @@ const InteractiveMap = ({ fullHeight = false }: InteractiveMapProps) => {
             </Polyline>
           ))}
           
-          {/* Markers */}
+          {/* Markers - Click to open context panel */}
           {filteredMarkers.map(marker => (
             <Marker
               key={marker.id}
               position={[marker.lat, marker.lng]}
               icon={getIconByType(marker.type)}
+              eventHandlers={{
+                click: () => handleMarkerClick(marker),
+              }}
             >
               <Popup>
                 <div className="p-2 min-w-[180px]">
@@ -395,6 +418,12 @@ const InteractiveMap = ({ fullHeight = false }: InteractiveMapProps) => {
                       Last inspection: {marker.lastInspection}
                     </div>
                   )}
+                  <button 
+                    onClick={() => handleMarkerClick(marker)}
+                    className="mt-2 w-full py-1 text-[10px] font-medium bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors"
+                  >
+                    View Details →
+                  </button>
                 </div>
               </Popup>
             </Marker>
