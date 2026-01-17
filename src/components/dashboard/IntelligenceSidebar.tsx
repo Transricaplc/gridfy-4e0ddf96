@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, MapPin, X, Mountain, Loader2, Waves, FileWarning, Radio, Network, Activity } from 'lucide-react';
+import { Search, MapPin, X, Mountain, Loader2, Waves, FileWarning, Radio, Network, Activity, Maximize2 } from 'lucide-react';
 import { useSuburbIntelligence, SuburbIntelligence, getSafetyColor } from '@/hooks/useSuburbIntelligence';
 import SectorReport from './SectorReport';
 import TouristProtocolsPanel from './TouristProtocolsPanel';
@@ -10,11 +10,15 @@ import CitizenReportModal from './CitizenReportModal';
 import LiveReportFeed from './LiveReportFeed';
 import OntologyViewer from './OntologyViewer';
 import ExecutiveSummary from './ExecutiveSummary';
+import ExpandablePanel from './ExpandablePanel';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 interface IntelligenceSidebarProps {
   onSuburbSelect?: (suburb: SuburbIntelligence | null) => void;
 }
+
+type TabType = 'executive' | 'ontology' | 'reports' | 'trails';
 
 const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
   const { suburbs, loading, error, searchSuburbs } = useSuburbIntelligence();
@@ -22,6 +26,7 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
   const [selectedSuburb, setSelectedSuburb] = useState<SuburbIntelligence | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [expandedTab, setExpandedTab] = useState<TabType | null>(null);
 
   const filteredSuburbs = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -40,7 +45,6 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
     onSuburbSelect?.(null);
   };
 
-  // Quick access suburbs - mix of high and low safety areas
   const quickAccessSuburbs = useMemo(() => {
     return [
       suburbs.find(s => s.id === 'ottery'),
@@ -50,6 +54,13 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
       suburbs.find(s => s.id === 'camps-bay'),
     ].filter(Boolean) as SuburbIntelligence[];
   }, [suburbs]);
+
+  const tabConfig = {
+    executive: { icon: <Activity className="w-4 h-4 text-primary" />, title: 'City KPIs & Executive Summary', component: <ExecutiveSummary /> },
+    ontology: { icon: <Network className="w-4 h-4 text-primary" />, title: 'Entity Graph & Relationships', component: <OntologyViewer /> },
+    reports: { icon: <Radio className="w-4 h-4 text-primary" />, title: 'Live Report Feed', component: <LiveReportFeed /> },
+    trails: { icon: <Mountain className="w-4 h-4 text-primary" />, title: 'Hiking Trails & Outdoor Safety', component: <HikingTrailsPanel /> },
+  };
 
   if (error) {
     return (
@@ -64,7 +75,7 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
 
   return (
     <div className="h-full flex flex-col space-y-2.5 overflow-hidden">
-      {/* Report Button - Compact, 1-tap */}
+      {/* Report Button */}
       <button
         onClick={() => setReportModalOpen(true)}
         className="flex-shrink-0 flex items-center justify-center gap-2 w-full py-2 rounded-lg font-tactical text-xs font-bold tracking-wide bg-amber-500/20 border border-amber-500/40 text-amber-400 hover:bg-amber-500/30 active:scale-[0.98] transition-all"
@@ -73,7 +84,7 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
         REPORT
       </button>
 
-      {/* Search Section - Compact */}
+      {/* Search Section */}
       <div className="flex-shrink-0 relative">
         <div className={cn(
           'relative bg-card/60 backdrop-blur-sm rounded-lg border transition-all duration-150',
@@ -109,7 +120,7 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
           </div>
         </div>
 
-        {/* Search Results Dropdown - Compact */}
+        {/* Search Results Dropdown */}
         {isFocused && filteredSuburbs.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-card/95 backdrop-blur-lg rounded-lg border border-primary/25 shadow-xl overflow-hidden z-50 animate-fade-in">
             {filteredSuburbs.map(suburb => (
@@ -136,7 +147,7 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
           </div>
         )}
 
-        {/* No Results - Compact */}
+        {/* No Results */}
         {isFocused && searchQuery && filteredSuburbs.length === 0 && !loading && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-card/95 backdrop-blur-lg rounded-lg border border-border/50 shadow-lg p-3 text-center z-50 animate-fade-in">
             <MapPin className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
@@ -145,7 +156,7 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
         )}
       </div>
 
-      {/* Quick Access Pills - Compact */}
+      {/* Quick Access Pills */}
       {!selectedSuburb && !loading && (
         <div className="flex-shrink-0 flex flex-wrap gap-1.5">
           {quickAccessSuburbs.map(suburb => (
@@ -172,84 +183,81 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
         </div>
       )}
 
-      {/* Intelligence Tabs - Sticky at top for accessibility */}
+      {/* Intelligence Tabs - Click to expand full screen */}
       <div 
         className="flex-shrink-0 bg-card/60 backdrop-blur-sm rounded-lg border border-border/40 p-1"
         role="navigation"
-        aria-label="Intelligence panels"
+        aria-label="Intelligence panels - click to expand"
       >
-        <Tabs defaultValue="executive" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 h-9 bg-background/50 border border-border/30 rounded-md">
-            <TabsTrigger 
-              value="executive" 
-              className="text-[10px] h-7 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground focus:ring-2 focus:ring-primary/50"
-              aria-label="City KPIs"
-            >
-              <Activity className="w-3 h-3 mr-1" aria-hidden="true" /> 
-              <span className="hidden sm:inline">KPIs</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="ontology" 
-              className="text-[10px] h-7 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground focus:ring-2 focus:ring-primary/50"
-              aria-label="Entity Graph"
-            >
-              <Network className="w-3 h-3 mr-1" aria-hidden="true" /> 
-              <span className="hidden sm:inline">Graph</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="reports" 
-              className="text-[10px] h-7 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground focus:ring-2 focus:ring-primary/50"
-              aria-label="Live Report Feed"
-            >
-              <Radio className="w-3 h-3 mr-1" aria-hidden="true" /> 
-              <span className="hidden sm:inline">Feed</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="trails" 
-              className="text-[10px] h-7 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground focus:ring-2 focus:ring-primary/50"
-              aria-label="Hiking Trails"
-            >
-              <Mountain className="w-3 h-3 mr-1" aria-hidden="true" /> 
-              <span className="hidden sm:inline">Trails</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          {/* Tab content in scrollable area */}
-          <div className="mt-2 max-h-[300px] overflow-y-auto scrollbar-hide">
-            <TabsContent value="executive" className="m-0">
-              <ExecutiveSummary />
-            </TabsContent>
-            <TabsContent value="ontology" className="m-0">
-              <OntologyViewer />
-            </TabsContent>
-            <TabsContent value="reports" className="m-0">
-              <LiveReportFeed />
-            </TabsContent>
-            <TabsContent value="trails" className="m-0">
-              <HikingTrailsPanel />
-            </TabsContent>
-          </div>
-        </Tabs>
+        <div className="grid grid-cols-4 gap-1">
+          {(Object.keys(tabConfig) as TabType[]).map((tab) => {
+            const config = tabConfig[tab];
+            const icons = {
+              executive: <Activity className="w-3.5 h-3.5" />,
+              ontology: <Network className="w-3.5 h-3.5" />,
+              reports: <Radio className="w-3.5 h-3.5" />,
+              trails: <Mountain className="w-3.5 h-3.5" />,
+            };
+            const labels = {
+              executive: 'KPIs',
+              ontology: 'Graph',
+              reports: 'Feed',
+              trails: 'Trails',
+            };
+            
+            return (
+              <button
+                key={tab}
+                onClick={() => setExpandedTab(tab)}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 p-2 rounded-md transition-all",
+                  "bg-background/50 border border-border/30 hover:border-primary/50 hover:bg-primary/10",
+                  "focus:ring-2 focus:ring-primary/50 focus:outline-none",
+                  "group"
+                )}
+                aria-label={`Expand ${labels[tab]} panel`}
+              >
+                <div className="flex items-center gap-1">
+                  {icons[tab]}
+                  <Maximize2 className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                </div>
+                <span className="text-[10px] font-medium">{labels[tab]}</span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[9px] text-center text-muted-foreground mt-1.5 font-mono">
+          Click to expand full view
+        </p>
       </div>
 
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto space-y-3 scrollbar-hide pb-4">
-        {/* Sector Report Card (connected to Supabase) */}
         <SectorReport 
           suburb={selectedSuburb} 
           onClose={handleCloseSuburb}
           loading={loading && !!searchQuery}
         />
-
-        {/* Weather Panel */}
         <WeatherPanel />
-
-        {/* Water Utility Panel */}
         <WaterUtilityPanel />
       </div>
 
       {/* Citizen Report Modal */}
       <CitizenReportModal open={reportModalOpen} onOpenChange={setReportModalOpen} />
+
+      {/* Expanded Panel Modals */}
+      {expandedTab && (
+        <ExpandablePanel
+          title={tabConfig[expandedTab].title}
+          icon={tabConfig[expandedTab].icon}
+          isOpen={!!expandedTab}
+          onClose={() => setExpandedTab(null)}
+        >
+          <div className="h-full">
+            {tabConfig[expandedTab].component}
+          </div>
+        </ExpandablePanel>
+      )}
     </div>
   );
 };
