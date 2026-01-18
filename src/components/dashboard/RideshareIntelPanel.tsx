@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { 
   Search, MapPin, Phone, Hospital, Shield, X, AlertTriangle, CheckCircle, Info, 
   Clock, Sun, Moon, Sunset, Car, CreditCard, Eye, Navigation, Users, Radio,
@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSuburbIntelligence, getRiskLevel, getSafetyColor, estimateFunctioningCCTV } from '@/hooks/useSuburbIntelligence';
+import { useDashboard } from '@/contexts/DashboardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -431,6 +432,7 @@ const TripAcceptanceGuidance = () => (
 // Main Component
 const RideshareIntelPanel = () => {
   const { suburbs, loading, error } = useSuburbIntelligence();
+  const { selectEntity } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSuburb, setSelectedSuburb] = useState<typeof suburbs[0] | null>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -458,11 +460,34 @@ const RideshareIntelPanel = () => {
     };
   }, [suburbs, timeOfDay]);
 
-  const handleSelectSuburb = (suburb: typeof suburbs[0]) => {
+  // Select suburb and open global center-top panel
+  const handleSelectSuburb = useCallback((suburb: typeof suburbs[0]) => {
     setSelectedSuburb(suburb);
     setSearchQuery('');
     setIsFocused(false);
-  };
+    
+    // Trigger global center-top panel via DashboardContext
+    selectEntity({
+      id: suburb.id,
+      type: 'rideshare',
+      name: suburb.suburb_name,
+      data: {
+        ward_id: suburb.ward_id,
+        area_code: suburb.area_code,
+        safety_score: suburb.safety_score,
+        cctv_coverage: suburb.cctv_coverage,
+        incidents_24h: suburb.incidents_24h,
+        saps_station: suburb.saps_station,
+        saps_contact: suburb.saps_contact,
+        fire_station: suburb.fire_station,
+        fire_contact: suburb.fire_contact,
+        hospital_name: suburb.hospital_name,
+        hospital_contact: suburb.hospital_contact,
+        risk_type: suburb.risk_type,
+        timeOfDay: timeOfDay,
+      }
+    });
+  }, [selectEntity, suburbs, timeOfDay]);
 
   if (loading) {
     return (

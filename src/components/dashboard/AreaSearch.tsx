@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Search, MapPin, Shield, Cross, Phone, Camera, AlertTriangle, X } from 'lucide-react';
 import { areasData, AreaData } from '@/data/emergencyContacts';
+import { useDashboard } from '@/contexts/DashboardContext';
 import { getSafetyColor, cn } from '@/lib/utils';
 
 const riskBadgeStyles = {
@@ -119,6 +120,7 @@ const AreaCard = ({ area, onClose }: AreaCardProps) => {
 };
 
 const AreaSearch = () => {
+  const { selectEntity } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState<AreaData | null>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -131,11 +133,29 @@ const AreaSearch = () => {
     ).slice(0, 5);
   }, [searchQuery]);
 
-  const handleSelectArea = (area: AreaData) => {
+  // Select area and open global center-top panel
+  const handleSelectArea = useCallback((area: AreaData) => {
     setSelectedArea(area);
     setSearchQuery('');
     setIsFocused(false);
-  };
+    
+    // Trigger global center-top panel via DashboardContext
+    selectEntity({
+      id: area.id,
+      type: 'area',
+      name: area.name,
+      data: {
+        safety_score: area.safetyScore,
+        incidents_24h: area.incidents24h,
+        cctv_coverage: area.camerasCoverage,
+        saps_station: area.policeStation,
+        saps_contact: area.policeNumber,
+        hospital_name: area.nearestHospital,
+        hospital_contact: area.hospitalNumber,
+        risk_type: area.riskLevel,
+      }
+    });
+  }, [selectEntity]);
 
   return (
     <div className="space-y-4">

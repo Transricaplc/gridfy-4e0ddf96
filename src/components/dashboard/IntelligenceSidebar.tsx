@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Search, MapPin, X, Mountain, Loader2, Waves, Radio, Network, Activity, Maximize2 } from 'lucide-react';
 import { useSuburbIntelligence, SuburbIntelligence, getSafetyColor } from '@/hooks/useSuburbIntelligence';
+import { useDashboard } from '@/contexts/DashboardContext';
 import SectorReport from './SectorReport';
 import TouristProtocolsPanel from './TouristProtocolsPanel';
 import WaterUtilityPanel from './WaterUtilityPanel';
@@ -23,6 +24,7 @@ type TabType = 'executive' | 'ontology' | 'reports' | 'trails';
 
 const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
   const { suburbs, loading, error, searchSuburbs } = useSuburbIntelligence();
+  const { selectEntity } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSuburb, setSelectedSuburb] = useState<SuburbIntelligence | null>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -34,12 +36,34 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
     return searchSuburbs(searchQuery);
   }, [searchQuery, searchSuburbs]);
 
-  const handleSelectSuburb = (suburb: SuburbIntelligence) => {
+  // Select suburb and open global center-top panel
+  const handleSelectSuburb = useCallback((suburb: SuburbIntelligence) => {
     setSelectedSuburb(suburb);
     setSearchQuery('');
     setIsFocused(false);
     onSuburbSelect?.(suburb);
-  };
+    
+    // Trigger global center-top panel via DashboardContext
+    selectEntity({
+      id: suburb.id,
+      type: 'suburb',
+      name: suburb.suburb_name,
+      data: {
+        ward_id: suburb.ward_id,
+        area_code: suburb.area_code,
+        safety_score: suburb.safety_score,
+        cctv_coverage: suburb.cctv_coverage,
+        incidents_24h: suburb.incidents_24h,
+        saps_station: suburb.saps_station,
+        saps_contact: suburb.saps_contact,
+        fire_station: suburb.fire_station,
+        fire_contact: suburb.fire_contact,
+        hospital_name: suburb.hospital_name,
+        hospital_contact: suburb.hospital_contact,
+        risk_type: suburb.risk_type,
+      }
+    });
+  }, [selectEntity, onSuburbSelect]);
 
   const handleCloseSuburb = () => {
     setSelectedSuburb(null);
