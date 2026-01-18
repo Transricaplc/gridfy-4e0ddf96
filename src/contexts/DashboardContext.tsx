@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 // TYPES
 // =============================================
 
-export type EntityType = 'cctv' | 'traffic_signal' | 'incident' | 'suburb' | 'alert' | 'infrastructure' | null;
+export type EntityType = 'cctv' | 'traffic_signal' | 'incident' | 'suburb' | 'ward' | 'area' | 'street' | 'alert' | 'infrastructure' | 'rideshare' | null;
 export type TimeFilter = 'live' | '24h' | '7d' | '30d';
 
 export interface SelectedEntity {

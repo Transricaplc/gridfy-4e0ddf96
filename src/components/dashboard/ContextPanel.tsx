@@ -1,13 +1,15 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { 
   X, MapPin, Clock, AlertTriangle, Camera, TrafficCone,
   ChevronRight, Activity, Link2, History, ExternalLink,
-  Shield, Maximize2, GripHorizontal, ChevronUp, ChevronDown, Copy
+  Shield, Maximize2, GripHorizontal, ChevronUp, ChevronDown, Copy,
+  Phone, Flame, Cross, Signal, Radio, Car
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDashboard, SelectedEntity } from '@/contexts/DashboardContext';
 import { useOntology } from '@/hooks/useOntology';
 import { usePanelState } from '@/hooks/usePanelState';
+import { getSafetyColor } from '@/hooks/useSuburbIntelligence';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -231,100 +233,107 @@ const ContextPanel = () => {
             "scrollbar-visible"
           )}>
             <div className="p-4 space-y-4">
-              {/* Priority: Quick Stats */}
-              <QuickStatsGrid entity={selectedEntity} />
+              {/* Suburb/Rideshare/Area Specific Content */}
+              {(selectedEntity.type === 'suburb' || selectedEntity.type === 'rideshare' || selectedEntity.type === 'area') && selectedEntity.data ? (
+                <SuburbDetailContent entity={selectedEntity} />
+              ) : (
+                <>
+                  {/* Priority: Quick Stats */}
+                  <QuickStatsGrid entity={selectedEntity} />
 
-              <Separator />
+                  <Separator />
 
-              {/* Environmental Cluster - Weather, Wind, K9 */}
-              <div>
-                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <Activity className="w-3 h-3" />
-                  Environmental Context
-                </h3>
-                <EnvironmentalCluster compact />
-              </div>
+                  {/* Environmental Cluster - Weather, Wind, K9 */}
+                  <div>
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
+                      <Activity className="w-3 h-3" />
+                      Environmental Context
+                    </h3>
+                    <EnvironmentalCluster compact />
+                  </div>
 
-              <Separator />
+                  <Separator />
 
-              {/* Location Context */}
-              {selectedEntity.coordinates && (
-                <Card className="bg-background/30 border-border/30">
-                  <CardHeader className="py-2 px-3">
-                    <CardTitle className="text-xs font-medium flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-primary" />
-                      Location
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="px-3 pb-3">
-                    <p className="text-xs text-muted-foreground font-mono">
-                      {selectedEntity.coordinates.lat.toFixed(6)}, {selectedEntity.coordinates.lng.toFixed(6)}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Related Entities */}
-              <Card className="bg-background/30 border-border/30">
-                <CardHeader className="py-2 px-3">
-                  <CardTitle className="text-xs font-medium flex items-center gap-2">
-                    <Link2 className="w-3 h-3 text-primary" />
-                    Related Entities
-                    {loading && <span className="text-muted-foreground">(loading...)</span>}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 pb-3">
-                  {neighbors.length > 0 ? (
-                    <div className="space-y-2">
-                      {neighbors.slice(0, 8).map((neighbor, idx) => (
-                        <RelatedEntityCard key={idx} neighbor={neighbor} />
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground py-4 text-center">
-                      No related entities found
-                    </p>
+                  {/* Location Context */}
+                  {selectedEntity.coordinates && (
+                    <Card className="bg-background/30 border-border/30">
+                      <CardHeader className="py-2 px-3">
+                        <CardTitle className="text-xs font-medium flex items-center gap-2">
+                          <MapPin className="w-3 h-3 text-primary" />
+                          Location
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="px-3 pb-3">
+                        <p className="text-xs text-muted-foreground font-mono">
+                          {selectedEntity.coordinates.lat.toFixed(6)}, {selectedEntity.coordinates.lng.toFixed(6)}
+                        </p>
+                      </CardContent>
+                    </Card>
                   )}
-                </CardContent>
-              </Card>
 
-              {/* Linked Incidents */}
-              <Card className="bg-background/30 border-border/30">
-                <CardHeader className="py-2 px-3">
-                  <CardTitle className="text-xs font-medium flex items-center gap-2">
-                    <AlertTriangle className="w-3 h-3 text-orange-400" />
-                    Linked Incidents
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 pb-3">
-                  <IncidentList entityId={selectedEntity.id} />
-                </CardContent>
-              </Card>
+                  {/* Related Entities */}
+                  <Card className="bg-background/30 border-border/30">
+                    <CardHeader className="py-2 px-3">
+                      <CardTitle className="text-xs font-medium flex items-center gap-2">
+                        <Link2 className="w-3 h-3 text-primary" />
+                        Related Entities
+                        {loading && <span className="text-muted-foreground">(loading...)</span>}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-3 pb-3">
+                      {neighbors.length > 0 ? (
+                        <div className="space-y-2">
+                          {neighbors.slice(0, 8).map((neighbor, idx) => (
+                            <RelatedEntityCard key={idx} neighbor={neighbor} />
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground py-4 text-center">
+                          No related entities found
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
 
-              {/* Historical Changes */}
-              <Card className="bg-background/30 border-border/30">
-                <CardHeader className="py-2 px-3">
-                  <CardTitle className="text-xs font-medium flex items-center gap-2">
-                    <History className="w-3 h-3 text-primary" />
-                    Recent Changes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 pb-3">
-                  <ChangeHistory entityId={selectedEntity.id} />
-                </CardContent>
-              </Card>
+                  {/* Linked Incidents */}
+                  <Card className="bg-background/30 border-border/30">
+                    <CardHeader className="py-2 px-3">
+                      <CardTitle className="text-xs font-medium flex items-center gap-2">
+                        <AlertTriangle className="w-3 h-3 text-orange-400" />
+                        Linked Incidents
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-3 pb-3">
+                      <IncidentList entityId={selectedEntity.id} />
+                    </CardContent>
+                  </Card>
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                <button className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-xs font-medium">
-                  <ExternalLink className="w-3 h-3" />
-                  Full Details
-                </button>
-                <button className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-background/50 hover:bg-background/70 transition-colors text-xs font-medium">
-                  <Activity className="w-3 h-3" />
-                  View Trends
-                </button>
-              </div>
+                  {/* Historical Changes */}
+                  <Card className="bg-background/30 border-border/30">
+                    <CardHeader className="py-2 px-3">
+                      <CardTitle className="text-xs font-medium flex items-center gap-2">
+                        <History className="w-3 h-3 text-primary" />
+                        Recent Changes
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-3 pb-3">
+                      <ChangeHistory entityId={selectedEntity.id} />
+                    </CardContent>
+                  </Card>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <button className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-xs font-medium">
+                      <ExternalLink className="w-3 h-3" />
+                      Full Details
+                    </button>
+                    <button className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-background/50 hover:bg-background/70 transition-colors text-xs font-medium">
+                      <Activity className="w-3 h-3" />
+                      View Trends
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </ScrollArea>
         </div>
@@ -339,6 +348,153 @@ const ContextPanel = () => {
 };
 
 // Helper Components
+
+// Suburb/Rideshare Detail Content - Top Priority Information
+const SuburbDetailContent = ({ entity }: { entity: SelectedEntity }) => {
+  const data = entity.data as Record<string, unknown>;
+  const safetyScore = Number(data?.safety_score) || 0;
+  const safetyColor = getSafetyColor(safetyScore);
+  
+  const getRiskLabel = (score: number) => {
+    if (score >= 80) return { label: 'LOW RISK', class: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' };
+    if (score >= 60) return { label: 'MODERATE', class: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
+    if (score >= 40) return { label: 'HIGH RISK', class: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
+    return { label: 'CRITICAL', class: 'bg-red-500/20 text-red-400 border-red-500/30' };
+  };
+  
+  const risk = getRiskLabel(safetyScore);
+
+  return (
+    <div className="space-y-4">
+      {/* Primary: Safety Score & Risk */}
+      <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-primary/10 to-transparent border border-primary/20">
+        <div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-mono">Safety Score</div>
+          <div 
+            className="text-4xl font-black font-mono tabular-nums"
+            style={{ color: safetyColor }}
+          >
+            {safetyScore}
+          </div>
+        </div>
+        <div className={cn('px-4 py-2 rounded-lg border font-bold text-sm font-mono', risk.class)}>
+          {risk.label}
+        </div>
+      </div>
+
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="p-3 rounded-lg bg-background/50 border border-border/30">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+            <AlertTriangle className="w-3 h-3" />
+            <span className="text-[10px] font-mono">INCIDENTS</span>
+          </div>
+          <div className="text-xl font-bold font-mono tabular-nums">{String(data?.incidents_24h || 0)}</div>
+        </div>
+        <div className="p-3 rounded-lg bg-background/50 border border-border/30">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+            <Camera className="w-3 h-3" />
+            <span className="text-[10px] font-mono">CCTV</span>
+          </div>
+          <div className="text-xl font-bold font-mono tabular-nums text-primary">{String(data?.cctv_coverage || 0)}%</div>
+        </div>
+        <div className="p-3 rounded-lg bg-background/50 border border-border/30">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+            <MapPin className="w-3 h-3" />
+            <span className="text-[10px] font-mono">WARD</span>
+          </div>
+          <div className="text-xl font-bold font-mono tabular-nums">{String(data?.ward_id || '-')}</div>
+        </div>
+      </div>
+
+      {/* Environmental Context */}
+      <div>
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
+          <Activity className="w-3 h-3" />
+          Environmental Context
+        </h3>
+        <EnvironmentalCluster compact />
+      </div>
+
+      <Separator />
+
+      {/* Emergency Contacts - High Priority */}
+      <div className="space-y-2">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <Phone className="w-3 h-3" />
+          Emergency Contacts
+        </h3>
+        
+        {/* SAPS */}
+        {data?.saps_station && (
+          <a
+            href={`tel:${String(data.saps_contact || '').replace(/\s/g, '')}`}
+            className="flex items-center gap-3 p-3 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 transition-all group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500 transition-colors">
+              <Shield className="w-4 h-4 text-blue-400 group-hover:text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-foreground text-sm truncate">{String(data.saps_station)}</div>
+              <div className="text-xs text-muted-foreground font-mono">SAPS Station</div>
+            </div>
+            <span className="font-mono text-sm font-bold text-blue-400 tabular-nums">{String(data.saps_contact || '')}</span>
+          </a>
+        )}
+
+        {/* Fire */}
+        {data?.fire_station && (
+          <a
+            href={`tel:${String(data.fire_contact || '').replace(/\s/g, '')}`}
+            className="flex items-center gap-3 p-3 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 transition-all group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+              <Flame className="w-4 h-4 text-orange-400 group-hover:text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-foreground text-sm truncate">{String(data.fire_station)}</div>
+              <div className="text-xs text-muted-foreground font-mono">Fire & Rescue</div>
+            </div>
+            <span className="font-mono text-sm font-bold text-orange-400 tabular-nums">{String(data.fire_contact || '')}</span>
+          </a>
+        )}
+
+        {/* Hospital */}
+        {data?.hospital_name && (
+          <a
+            href={`tel:${String(data.hospital_contact || '').replace(/\s/g, '')}`}
+            className="flex items-center gap-3 p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 transition-all group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center group-hover:bg-red-500 transition-colors">
+              <Cross className="w-4 h-4 text-red-400 group-hover:text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-foreground text-sm truncate">{String(data.hospital_name)}</div>
+              <div className="text-xs text-muted-foreground font-mono">Nearest Hospital</div>
+            </div>
+            <span className="font-mono text-sm font-bold text-red-400 tabular-nums">{String(data.hospital_contact || '')}</span>
+          </a>
+        )}
+      </div>
+
+      {/* Rideshare specific info */}
+      {entity.type === 'rideshare' && data?.timeOfDay && (
+        <>
+          <Separator />
+          <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="flex items-center gap-2 text-primary mb-1">
+              <Car className="w-4 h-4" />
+              <span className="text-xs font-medium uppercase">Rideshare Intel</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Time-adjusted safety score for <span className="font-semibold text-foreground">{String(data.timeOfDay)}</span> operations
+            </p>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 const QuickStatsGrid = ({ entity }: { entity: SelectedEntity }) => {
   const stats = [
@@ -428,6 +584,9 @@ const getTypeIcon = (type: string | null) => {
     case 'cctv': return <Camera className="w-4 h-4" />;
     case 'traffic_signal': return <TrafficCone className="w-4 h-4" />;
     case 'incident': return <AlertTriangle className="w-4 h-4" />;
+    case 'suburb': return <MapPin className="w-4 h-4" />;
+    case 'area': return <MapPin className="w-4 h-4" />;
+    case 'rideshare': return <Car className="w-4 h-4" />;
     default: return <MapPin className="w-4 h-4" />;
   }
 };
@@ -437,6 +596,9 @@ const getTypeStyle = (type: string | null) => {
     case 'cctv': return { bg: 'bg-blue-500/20', text: 'text-blue-400' };
     case 'traffic_signal': return { bg: 'bg-emerald-500/20', text: 'text-emerald-400' };
     case 'incident': return { bg: 'bg-orange-500/20', text: 'text-orange-400' };
+    case 'suburb': return { bg: 'bg-primary/20', text: 'text-primary' };
+    case 'area': return { bg: 'bg-cyan-500/20', text: 'text-cyan-400' };
+    case 'rideshare': return { bg: 'bg-violet-500/20', text: 'text-violet-400' };
     default: return { bg: 'bg-primary/20', text: 'text-primary' };
   }
 };
