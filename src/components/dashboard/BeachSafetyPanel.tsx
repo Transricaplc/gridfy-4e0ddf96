@@ -69,7 +69,7 @@ const BeachSafetyPanel = () => {
         </div>
 
         {/* Beach List */}
-        <div className="space-y-1.5 max-h-[200px] overflow-y-auto scrollbar-hide">
+        <div className="space-y-1.5 max-h-[200px] overflow-y-auto scrollbar-visible">
           {filteredBeaches.map(beach => (
             <div 
               key={beach.id}

@@ -26,7 +26,7 @@ const TabNavigation = ({ activeTab, onTabChange }: TabNavigationProps) => {
   return (
     <div className="bg-card border-b border-border">
       <div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex overflow-x-auto scrollbar-hide">
+        <div className="flex overflow-x-auto scrollbar-visible">
           {tabs.map(tab => (
             <button
               key={tab.id}

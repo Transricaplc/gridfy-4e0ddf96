@@ -88,7 +88,7 @@ const LoadsheddingPanel = () => {
         )}
 
         {/* Status List */}
-        <div className="space-y-1.5 max-h-[180px] overflow-y-auto scrollbar-hide">
+        <div className="space-y-1.5 max-h-[180px] overflow-y-auto scrollbar-visible">
           {filteredData.map(item => (
             <div 
               key={item.id}

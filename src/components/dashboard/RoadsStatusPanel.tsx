@@ -172,7 +172,7 @@ const RoadsStatusPanel = () => {
       </div>
 
       {/* Filter Pills */}
-      <div className="px-3 py-2 flex gap-2 border-b border-border/50 overflow-x-auto scrollbar-hide">
+      <div className="px-3 py-2 flex gap-2 border-b border-border/50 overflow-x-auto scrollbar-visible">
         {(['all', 'national', 'municipal', 'regional'] as const).map(type => (
           <button
             key={type}

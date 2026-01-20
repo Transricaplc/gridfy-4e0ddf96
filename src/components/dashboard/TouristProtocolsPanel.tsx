@@ -49,7 +49,7 @@ const TouristProtocolsPanel = () => {
 
       <div className="p-3 space-y-2">
         {/* Sites List */}
-        <div className="space-y-1.5 max-h-[250px] overflow-y-auto scrollbar-hide">
+        <div className="space-y-1.5 max-h-[250px] overflow-y-auto scrollbar-visible">
           {touristSites.map(site => (
             <div 
               key={site.id}
