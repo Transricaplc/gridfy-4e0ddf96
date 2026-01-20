@@ -101,7 +101,7 @@ const FlightStatusPanel = () => {
         </div>
 
         {/* Flight List */}
-        <div className="space-y-1 max-h-[160px] overflow-y-auto scrollbar-hide">
+        <div className="space-y-1 max-h-[160px] overflow-y-auto scrollbar-visible">
           {filteredFlights.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-4">No flights found</p>
           ) : (

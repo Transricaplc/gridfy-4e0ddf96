@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { GeoJSON, Popup, useMap, useMapEvents } from 'react-leaflet';
 import { supabase } from '@/integrations/supabase/client';
 import type { FeatureCollection, Feature, Polygon, MultiPolygon } from 'geojson';
@@ -13,6 +13,8 @@ interface WardBoundariesLayerProps {
   visible?: boolean;
   minZoom?: number;
   onWardClick?: (wardNumber: number) => void;
+  highlightedWards?: Set<number>; // Ward numbers to highlight
+  comparisonMode?: boolean;
 }
 
 // Sample ward boundaries for Cape Town (demonstration data)
@@ -188,15 +190,39 @@ const sampleWardBoundaries: Record<number, Feature<Polygon>> = {
   }
 };
 
+// Comparison color palette for multiple ward highlighting
+const COMPARISON_COLORS = [
+  { fill: '#3b82f6', border: '#60a5fa' }, // Blue
+  { fill: '#10b981', border: '#34d399' }, // Emerald
+  { fill: '#f59e0b', border: '#fbbf24' }, // Amber
+  { fill: '#8b5cf6', border: '#a78bfa' }, // Violet
+  { fill: '#ef4444', border: '#f87171' }, // Red
+  { fill: '#ec4899', border: '#f472b6' }, // Pink
+];
+
 const WardBoundariesLayer = ({ 
   visible = true, 
   minZoom = 12,
-  onWardClick 
+  onWardClick,
+  highlightedWards,
+  comparisonMode = false
 }: WardBoundariesLayerProps) => {
   const map = useMap();
   const [currentZoom, setCurrentZoom] = useState(map.getZoom());
   const [wards, setWards] = useState<WardData[]>([]);
   const [hoveredWard, setHoveredWard] = useState<number | null>(null);
+
+  // Create stable color mapping for highlighted wards
+  const wardColorMap = useMemo(() => {
+    const colorMap = new Map<number, typeof COMPARISON_COLORS[0]>();
+    if (highlightedWards) {
+      const sortedWards = Array.from(highlightedWards).sort((a, b) => a - b);
+      sortedWards.forEach((wardNum, index) => {
+        colorMap.set(wardNum, COMPARISON_COLORS[index % COMPARISON_COLORS.length]);
+      });
+    }
+    return colorMap;
+  }, [highlightedWards]);
 
   // Track zoom level
   useMapEvents({
@@ -220,6 +246,12 @@ const WardBoundariesLayer = ({
     
     fetchWards();
   }, []);
+
+  // Use a stable key that includes comparison mode and highlighted wards - must be before early return
+  const layerKey = useMemo(() => {
+    const highlightedStr = highlightedWards ? Array.from(highlightedWards).sort().join('-') : '';
+    return `wards-${hoveredWard}-${comparisonMode}-${highlightedStr}`;
+  }, [hoveredWard, comparisonMode, highlightedWards]);
 
   // Don't render if not visible or zoom is too low
   if (!visible || currentZoom < minZoom) {
@@ -253,13 +285,38 @@ const WardBoundariesLayer = ({
   const getWardStyle = (feature: Feature | undefined) => {
     const wardNumber = feature?.properties?.ward_number;
     const isHovered = wardNumber === hoveredWard;
+    const isHighlighted = comparisonMode && highlightedWards?.has(wardNumber);
+    const wardColor = wardColorMap.get(wardNumber);
     
+    // Comparison mode styling with unique colors
+    if (isHighlighted && wardColor) {
+      return {
+        fillColor: wardColor.fill,
+        fillOpacity: isHovered ? 0.5 : 0.35,
+        color: wardColor.border,
+        weight: isHovered ? 4 : 3,
+        dashArray: ''
+      };
+    }
+    
+    // Hovered but not in comparison selection
+    if (isHovered) {
+      return {
+        fillColor: '#3b82f6',
+        fillOpacity: 0.35,
+        color: '#60a5fa',
+        weight: 3,
+        dashArray: ''
+      };
+    }
+    
+    // Default non-highlighted style
     return {
-      fillColor: isHovered ? '#3b82f6' : '#6366f1',
-      fillOpacity: isHovered ? 0.35 : 0.15,
-      color: isHovered ? '#60a5fa' : '#818cf8',
-      weight: isHovered ? 3 : 2,
-      dashArray: isHovered ? '' : '5, 5'
+      fillColor: comparisonMode ? '#64748b' : '#6366f1',
+      fillOpacity: comparisonMode ? 0.08 : 0.15,
+      color: comparisonMode ? '#94a3b8' : '#818cf8',
+      weight: comparisonMode ? 1 : 2,
+      dashArray: '5, 5'
     };
   };
 
@@ -288,7 +345,7 @@ const WardBoundariesLayer = ({
 
   return (
     <GeoJSON
-      key={`wards-${hoveredWard}`}
+      key={layerKey}
       data={wardCollection}
       style={getWardStyle}
       onEachFeature={onEachWard}
