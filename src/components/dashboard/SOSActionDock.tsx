@@ -85,7 +85,7 @@ const SOSActionDock = ({ isTravelerMode = false }: SOSActionDockProps) => {
                 <div>
                   <span className="font-semibold text-foreground">POPIA Compliant</span>
                   <p className="text-muted-foreground leading-tight">
-                    SafeSync complies with POPIA. No personally identifiable surveillance data stored.
+                    Grid complies with POPIA. No personally identifiable surveillance data stored.
                   </p>
                 </div>
               </div>
@@ -116,7 +116,7 @@ const SOSActionDock = ({ isTravelerMode = false }: SOSActionDockProps) => {
             {/* Disclaimer */}
             <div className="mt-2 p-1.5 bg-background/30 rounded text-center">
               <p className="text-[8px] text-muted-foreground font-mono">
-                SafeSync provides aggregated safety intelligence for informational purposes. In emergencies, always contact official services directly.
+                Grid provides aggregated safety intelligence for informational purposes. In emergencies, always contact official services directly.
                 Data sourced from City of Cape Town, SAPS, NSRI, and public municipal records.
               </p>
             </div>
@@ -124,7 +124,7 @@ const SOSActionDock = ({ isTravelerMode = false }: SOSActionDockProps) => {
             {/* Company Attribution */}
             <div className="mt-1 text-center">
               <p className="text-[8px] text-muted-foreground/70">
-                SafeSync is a product of <span className="font-semibold">Evenor Holdings (Pty) Ltd</span> © {new Date().getFullYear()}
+                Grid is a product of <span className="font-semibold">Evenor Holdings (Pty) Ltd</span> © {new Date().getFullYear()}
               </p>
             </div>
           </CollapsibleContent>

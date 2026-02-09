@@ -26,7 +26,7 @@ type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d';
 type SeverityLevel = 'all' | 'low' | 'medium' | 'high' | 'critical';
 
 const MapFirstLayout = () => {
-  const { contextPanelOpen, isTravelerMode } = useDashboard();
+  const { contextPanelOpen, isTravelerMode, setTravelerMode } = useDashboard();
   
   // Control Hub state
   const [controlHubExpanded, setControlHubExpanded] = useState(false);
@@ -81,7 +81,7 @@ const MapFirstLayout = () => {
       {/* Top Status Bar - Compact */}
       <TopStatusBar
         isTravelerMode={isTravelerMode}
-        onToggleTravelerMode={() => {}}
+        onToggleTravelerMode={() => setTravelerMode(!isTravelerMode)}
         alertCount={3}
         connectionStatus="connected"
       />
