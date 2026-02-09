@@ -1,16 +1,24 @@
+import { useState } from 'react';
 import MapFirstLayout from '@/components/dashboard/MapFirstLayout';
 import TravelerModeView from '@/components/dashboard/TravelerModeView';
 import SOSActionDock from '@/components/dashboard/SOSActionDock';
+import HeroSection from '@/components/dashboard/HeroSection';
+import TopStatusBar from '@/components/dashboard/TopStatusBar';
 import { DashboardProvider, useDashboard } from '@/contexts/DashboardContext';
 import { WildfireProvider } from '@/contexts/WildfireContext';
-import TopStatusBar from '@/components/dashboard/TopStatusBar';
 
 const DashboardContent = () => {
   const { isTravelerMode, setTravelerMode } = useDashboard();
+  const [showDashboard, setShowDashboard] = useState(false);
 
   const handleToggleTravelerMode = () => {
     setTravelerMode(!isTravelerMode);
   };
+
+  // Show hero first
+  if (!showDashboard) {
+    return <HeroSection onEnterDashboard={() => setShowDashboard(true)} />;
+  }
 
   if (isTravelerMode) {
     return (

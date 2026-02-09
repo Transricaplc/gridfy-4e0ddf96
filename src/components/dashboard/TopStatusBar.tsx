@@ -61,10 +61,10 @@ const TopStatusBar = ({
         </div>
         <div>
           <h1 className="text-sm font-black text-foreground tracking-tight">
-            Safe<span className={isTravelerMode ? "text-red-400" : "text-primary"}>Sync</span>
+            <span className={isTravelerMode ? "text-red-400" : "text-primary"}>Grid</span>
           </h1>
           <p className="text-[8px] text-muted-foreground font-tactical uppercase tracking-wider">
-            {isTravelerMode ? "EMERGENCY MODE" : "CITY INTEL • SYNCED SAFE"}
+            {isTravelerMode ? "EMERGENCY MODE" : "URBAN INTELLIGENCE"}
           </p>
         </div>
       </div>
