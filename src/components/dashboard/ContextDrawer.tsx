@@ -1,198 +1,184 @@
-import { useState } from 'react';
-import { ChevronUp, ChevronDown, X, Clock, AlertTriangle, Activity, MapPin } from 'lucide-react';
+import { memo } from 'react';
+import { X, Shield, MapPin, Phone, AlertTriangle, Camera, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useDashboard } from '@/contexts/DashboardContext';
-import LiveReportFeed from './LiveReportFeed';
-import EnvironmentalCluster from './EnvironmentalCluster';
+import { SelectedEntity } from '@/contexts/DashboardContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
- * Context Drawer - Bottom On-Demand Drawer
- * Shows contextual information and recent activity
- * Can be expanded/collapsed
+ * Context Drawer — v1.1 Stabilized
+ * 
+ * Shows entity detail when a ward/suburb/asset is selected.
+ * - Desktop: slides in from right, docks next to intelligence sidebar
+ * - Mobile: bottom sheet
+ * - Never overlays other panels
+ * - Single scroll container
+ * - Escape to close
  */
-const ContextDrawer = () => {
-  const { selectedEntity } = useDashboard();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'activity' | 'environmental' | 'details'>('activity');
 
-  return (
-    <div
-      className={cn(
-        "fixed bottom-0 left-0 right-0 z-40",
-        "bg-card/95 backdrop-blur-xl border-t border-border/50",
-        "transition-all duration-300 ease-out",
-        isExpanded ? "h-64" : "h-10"
-      )}
-    >
-      {/* Header / Toggle Bar */}
-      <div className="flex items-center justify-between px-4 h-12 border-b border-border/30">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-          >
-            {isExpanded ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronUp className="w-4 h-4" />
-            )}
-            <span>Context</span>
-          </button>
+interface ContextDrawerProps {
+  entity: SelectedEntity;
+  onClose: () => void;
+}
 
-          {/* Quick Stats */}
-          <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              <span>Last 24h</span>
-            </div>
-            <div className="flex items-center gap-1 text-amber-400">
-              <AlertTriangle className="w-3 h-3" />
-              <span>12 alerts</span>
-            </div>
-          </div>
-        </div>
+const ContextDrawer = memo(({ entity, onClose }: ContextDrawerProps) => {
+  const isMobile = useIsMobile();
+  const data = entity.data || {};
 
-        {/* Tab Navigation */}
-        {isExpanded && (
-          <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5">
-            {(['activity', 'environmental', 'details'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  "px-3 py-1 rounded-md text-[10px] font-medium transition-all",
-                  activeTab === tab
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-        )}
+  const getEntityIcon = () => {
+    switch (entity.type) {
+      case 'ward': return <Shield className="w-4 h-4 text-primary" />;
+      case 'suburb': return <MapPin className="w-4 h-4 text-primary" />;
+      case 'cctv': return <Camera className="w-4 h-4 text-primary" />;
+      default: return <Building2 className="w-4 h-4 text-primary" />;
+    }
+  };
 
-        {isExpanded && (
-          <button
-            onClick={() => setIsExpanded(false)}
-            className="p-1.5 rounded-md hover:bg-muted/50 transition-colors"
-          >
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-        )}
-      </div>
-
-      {/* Expanded Content */}
-      {isExpanded && (
-        <ScrollArea className="h-[calc(100%-48px)] scrollbar-visible">
-          <div className="p-4">
-            {activeTab === 'activity' && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                    Recent Activity
-                  </h3>
-                  <LiveReportFeed />
-                </div>
-                <div>
-                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                    Active Alerts
-                  </h3>
-                  <div className="space-y-2">
-                    <AlertItem
-                      title="Water Outage"
-                      location="Sea Point"
-                      time="15 min ago"
-                      severity="medium"
-                    />
-                    <AlertItem
-                      title="Traffic Congestion"
-                      location="N2 Highway"
-                      time="32 min ago"
-                      severity="low"
-                    />
-                    <AlertItem
-                      title="Wildfire Alert"
-                      location="Table Mountain"
-                      time="2h ago"
-                      severity="high"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'environmental' && (
-              <div className="max-w-xl">
-                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                  Environmental Conditions
-                </h3>
-                <EnvironmentalCluster />
-              </div>
-            )}
-
-            {activeTab === 'details' && selectedEntity && (
-              <div className="max-w-xl">
-                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {selectedEntity.name}
-                </h3>
-                <div className="text-sm text-muted-foreground">
-                  <p>Type: {selectedEntity.type}</p>
-                  {selectedEntity.coordinates && (
-                    <p className="font-mono text-xs mt-1">
-                      {selectedEntity.coordinates.lat.toFixed(6)}, {selectedEntity.coordinates.lng.toFixed(6)}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'details' && !selectedEntity && (
-              <div className="text-center py-8 text-muted-foreground">
-                <MapPin className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Select a location on the map to see details</p>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      )}
-    </div>
-  );
-};
-
-// Alert Item Component
-const AlertItem = ({
-  title,
-  location,
-  time,
-  severity,
-}: {
-  title: string;
-  location: string;
-  time: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-}) => {
-  const severityColors = {
-    low: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    medium: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    high: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-    critical: 'bg-red-500/20 text-red-400 border-red-500/30',
+  const safetyScore = data.safety_score as number | undefined;
+  const getSafetyColor = (score: number) => {
+    if (score >= 75) return 'text-emerald-400';
+    if (score >= 50) return 'text-amber-400';
+    return 'text-destructive';
   };
 
   return (
     <div className={cn(
-      "flex items-center justify-between p-2.5 rounded-lg border",
-      severityColors[severity]
+      "fixed z-30 bg-card/98 backdrop-blur-xl border-border/50 shadow-2xl shadow-black/30",
+      "animate-in duration-200",
+      isMobile
+        ? "bottom-0 left-0 right-0 max-h-[60vh] rounded-t-2xl border-t slide-in-from-bottom-4"
+        : "right-0 top-12 bottom-0 w-80 lg:w-[22rem] border-l slide-in-from-right-4 lg:right-80"
     )}>
-      <div>
-        <div className="text-xs font-medium text-foreground">{title}</div>
-        <div className="text-[10px] text-muted-foreground">{location}</div>
+      {/* Header */}
+      <div className="flex items-center justify-between p-3 border-b border-border/40 bg-gradient-to-r from-primary/10 to-transparent">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-1.5 rounded-lg bg-primary/15 shrink-0">
+            {getEntityIcon()}
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold truncate">{entity.name}</h3>
+            <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
+              {entity.type} detail
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1.5 rounded-lg bg-muted/50 hover:bg-destructive/20 hover:text-destructive transition-colors shrink-0"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
-      <div className="text-[10px] font-mono">{time}</div>
+
+      {/* Content — single scroll container */}
+      <ScrollArea className={cn(
+        isMobile ? "max-h-[calc(60vh-56px)]" : "h-[calc(100%-56px)]",
+        "scrollbar-visible"
+      )}>
+        <div className="p-4 space-y-4">
+          {/* Safety Score */}
+          {safetyScore !== undefined && (
+            <div className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-border/30">
+              <span className="text-xs text-muted-foreground font-medium">Safety Score</span>
+              <span className={cn("text-2xl font-black font-mono tabular-nums", getSafetyColor(safetyScore))}>
+                {safetyScore}
+              </span>
+            </div>
+          )}
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-2 gap-2">
+            {data.incidents_24h !== undefined && (
+              <MetricCard label="Incidents (24h)" value={String(data.incidents_24h)} color="text-amber-400" />
+            )}
+            {data.cctv_coverage !== undefined && (
+              <MetricCard label="CCTV Coverage" value={`${data.cctv_coverage}%`} color="text-primary" />
+            )}
+            {data.ward_id !== undefined && (
+              <MetricCard label="Ward" value={String(data.ward_id)} color="text-muted-foreground" />
+            )}
+            {data.suburb_count !== undefined && (
+              <MetricCard label="Suburbs" value={String(data.suburb_count)} color="text-muted-foreground" />
+            )}
+          </div>
+
+          {/* Emergency Contacts */}
+          {data.saps_station && (
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Emergency Contacts</h4>
+              <EmergencyContact icon={Shield} label={String(data.saps_station)} phone={String(data.saps_contact)} color="text-blue-400" />
+              {data.fire_station && (
+                <EmergencyContact icon={AlertTriangle} label={String(data.fire_station)} phone={String(data.fire_contact)} color="text-destructive" />
+              )}
+              {data.hospital_name && (
+                <EmergencyContact icon={Building2} label={String(data.hospital_name)} phone={String(data.hospital_contact)} color="text-emerald-400" />
+              )}
+            </div>
+          )}
+
+          {/* Suburbs list for ward entities */}
+          {data.suburbs && Array.isArray(data.suburbs) && (
+            <div className="space-y-1.5">
+              <h4 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Suburbs</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {(data.suburbs as string[]).map((s, i) => (
+                  <span key={i} className="px-2 py-1 rounded text-[10px] font-mono bg-muted/30 border border-border/30">
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Asset-specific data */}
+          {data.status && (
+            <div className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-border/30">
+              <span className="text-xs text-muted-foreground">Status</span>
+              <span className={cn(
+                "text-xs font-bold uppercase px-2 py-0.5 rounded-full",
+                data.status === 'operational' ? 'bg-emerald-500/20 text-emerald-400' :
+                data.status === 'faulty' ? 'bg-amber-500/20 text-amber-400' :
+                'bg-destructive/20 text-destructive'
+              )}>
+                {String(data.status)}
+              </span>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
-};
+});
+
+ContextDrawer.displayName = 'ContextDrawer';
+
+// Sub-components
+const MetricCard = memo(({ label, value, color }: { label: string; value: string; color: string }) => (
+  <div className="p-3 rounded-xl bg-background/50 border border-border/30">
+    <div className="text-[10px] text-muted-foreground font-medium mb-1">{label}</div>
+    <div className={cn("text-lg font-bold font-mono tabular-nums", color)}>{value}</div>
+  </div>
+));
+
+MetricCard.displayName = 'MetricCard';
+
+const EmergencyContact = memo(({ icon: Icon, label, phone, color }: { 
+  icon: any; label: string; phone: string; color: string 
+}) => (
+  <a
+    href={`tel:${phone.replace(/\s/g, '')}`}
+    className="flex items-center gap-3 p-2.5 rounded-lg bg-background/50 border border-border/30 hover:border-primary/30 transition-colors"
+  >
+    <Icon className={cn("w-4 h-4 shrink-0", color)} />
+    <div className="min-w-0 flex-1">
+      <div className="text-xs font-medium truncate">{label}</div>
+      <div className="text-[10px] text-muted-foreground font-mono">{phone}</div>
+    </div>
+    <Phone className="w-3 h-3 text-muted-foreground shrink-0" />
+  </a>
+));
+
+EmergencyContact.displayName = 'EmergencyContact';
 
 export default ContextDrawer;
