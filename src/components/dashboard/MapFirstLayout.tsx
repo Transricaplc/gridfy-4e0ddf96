@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useState, useCallback, useMemo, lazy, Suspense, memo } from 'react';
 import { 
   AlertTriangle, Grid3X3, Camera, Flame, Shield,
   Bike, Mountain, MapPin, TrafficCone, Users, Menu
@@ -6,6 +6,7 @@ import {
 import TopStatusBar from './TopStatusBar';
 import MapFirstView from './MapFirstView';
 import ControlHub, { LayerConfig } from './ControlHub';
+import ContextDrawer from './ContextDrawer';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -15,14 +16,27 @@ const IntelligenceSidebar = lazy(() => import('./IntelligenceSidebar'));
 const MobileBottomSheet = lazy(() => import('./MobileBottomSheet'));
 
 /**
- * Map-First Layout — Stabilized
+ * Map-First Layout — v1.1 Stabilized
+ * 
+ * Fixed Layout Zones:
+ * ┌──────────────────────────────────────────┐
+ * │ TOP STATUS BAR (h-12, z-50)             │
+ * ├────────┬─────────────────────┬───────────┤
+ * │CONTROL │                     │INTELLIGENCE│
+ * │HUB     │   CENTER MAP        │SIDEBAR    │
+ * │(z-30)  │   (z-0, flex-1)     │(z-20,w-80)│
+ * │        │                     │           │
+ * ├────────┴─────────────────────┴───────────┤
+ * │ SOS DOCK (z-50, fixed bottom)            │
+ * └──────────────────────────────────────────┘
  * 
  * Rules enforced:
  * 1. Only ONE primary panel visible at a time
- * 2. No draggable/floating panels that overlap
+ * 2. No draggable/floating panels — all docked
  * 3. Panels auto-collapse on map interaction
  * 4. Fixed grid system — no resize jitter
  * 5. Traveler mode locks all secondary panels
+ * 6. z-index hierarchy: map(0) < intel(20) < controls(30) < statusbar(50)
  */
 
 type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d';
@@ -32,7 +46,7 @@ type SeverityLevel = 'all' | 'low' | 'medium' | 'high' | 'critical';
 type ActivePanel = 'none' | 'controls' | 'intelligence';
 
 const MapFirstLayout = () => {
-  const { isTravelerMode, setTravelerMode } = useDashboard();
+  const { isTravelerMode, setTravelerMode, selectedEntity, clearSelection } = useDashboard();
   const isMobile = useIsMobile();
 
   // Single panel state — only one panel open at a time
@@ -43,7 +57,7 @@ const MapFirstLayout = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('24h');
   const [severity, setSeverity] = useState<SeverityLevel>('all');
   
-  // Layer configuration
+  // Layer configuration — memoized to prevent re-renders
   const [layers, setLayers] = useState<LayerConfig[]>([
     { id: 'heatmap', name: 'Crime Heatmap', icon: AlertTriangle, color: '#ef4444', enabled: true, category: 'safety' },
     { id: 'safezones', name: 'Safe Zones', icon: Shield, color: '#10b981', enabled: true, category: 'safety' },
@@ -81,7 +95,7 @@ const MapFirstLayout = () => {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
-      {/* Top Status Bar — fixed height, always visible */}
+      {/* TOP STATUS BAR — fixed h-12, always visible, z-50 */}
       <TopStatusBar
         isTravelerMode={isTravelerMode}
         onToggleTravelerMode={() => setTravelerMode(!isTravelerMode)}
@@ -89,15 +103,15 @@ const MapFirstLayout = () => {
         connectionStatus="connected"
       />
 
-      {/* Main Content — map fills remaining space */}
+      {/* MAIN CONTENT — flex-1, no overflow */}
       <main className="flex-1 relative overflow-hidden">
-        {/* Primary Map Canvas — always z-0 */}
+        {/* PRIMARY MAP CANVAS — z-0, fills all available space */}
         <MapFirstView 
           fullHeight 
           onMapInteraction={handleMapInteraction}
         />
 
-        {/* Control Hub — docked bottom-left (mobile) / top-left (desktop) */}
+        {/* CONTROL HUB — docked, z-30 */}
         {!isTravelerMode && (
           <ControlHub
             layers={layers}
@@ -114,29 +128,33 @@ const MapFirstLayout = () => {
           />
         )}
 
-        {/* Desktop: Right Intelligence Panel — fixed position, no drag */}
+        {/* DESKTOP: Right Intelligence Sidebar — fixed dock, z-20, w-80 */}
         {showIntelligenceSidebar && (
           <aside className={cn(
             "hidden lg:flex fixed right-0 top-12 bottom-0 w-80 z-20",
             "bg-card/95 backdrop-blur-xl border-l border-border/50",
-            "flex-col overflow-hidden"
+            "flex-col overflow-hidden will-change-auto"
           )}>
-            <Suspense fallback={<div className="flex-1 flex items-center justify-center"><span className="text-xs text-muted-foreground">Loading…</span></div>}>
+            <Suspense fallback={
+              <div className="flex-1 flex items-center justify-center">
+                <span className="text-xs text-muted-foreground font-mono">Loading…</span>
+              </div>
+            }>
               <IntelligenceSidebar />
             </Suspense>
           </aside>
         )}
 
-        {/* Mobile: Intelligence Toggle Button */}
+        {/* MOBILE: Intelligence Toggle Button */}
         {showMobileIntelButton && (
           <button
             onClick={() => togglePanel('intelligence')}
             className={cn(
               "lg:hidden fixed bottom-20 right-4 z-30",
               "flex items-center gap-2 px-4 py-2.5",
-              "rounded-full shadow-lg transition-all",
+              "rounded-full shadow-lg transition-all duration-200",
               activePanel === 'intelligence'
-                ? "bg-primary/80 text-primary-foreground"
+                ? "bg-primary text-primary-foreground"
                 : "bg-card/90 text-foreground border border-border/50"
             )}
           >
@@ -145,7 +163,7 @@ const MapFirstLayout = () => {
           </button>
         )}
 
-        {/* Mobile: Bottom Sheet for Intelligence — slides, never overlaps map controls */}
+        {/* MOBILE: Bottom Sheet — slides up, never overlaps map controls */}
         {isMobile && (
           <Suspense fallback={null}>
             <MobileBottomSheet
@@ -160,9 +178,17 @@ const MapFirstLayout = () => {
             </MobileBottomSheet>
           </Suspense>
         )}
+
+        {/* CONTEXT DRAWER — entity detail, docked right on desktop, bottom sheet on mobile */}
+        {selectedEntity && (
+          <ContextDrawer
+            entity={selectedEntity}
+            onClose={clearSelection}
+          />
+        )}
       </main>
     </div>
   );
 };
 
-export default MapFirstLayout;
+export default memo(MapFirstLayout);
