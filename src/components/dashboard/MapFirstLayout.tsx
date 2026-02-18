@@ -2,12 +2,14 @@ import { useState, useCallback, lazy, Suspense, memo } from 'react';
 import { 
   AlertTriangle, Grid3X3, Camera, Flame, Shield,
   Bike, Mountain, MapPin, TrafficCone, Users, Menu,
-  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen
+  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
+  Crosshair
 } from 'lucide-react';
 import TopStatusBar from './TopStatusBar';
 import MapFirstView from './MapFirstView';
 import ControlHub, { LayerConfig } from './ControlHub';
 import ContextDrawer from './ContextDrawer';
+import AreaIntelligenceDrawer from './AreaIntelligenceDrawer';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -42,7 +44,7 @@ const MobileBottomSheet = lazy(() => import('./MobileBottomSheet'));
 
 type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d';
 type SeverityLevel = 'all' | 'low' | 'medium' | 'high' | 'critical';
-type ActivePanel = 'none' | 'controls' | 'intelligence';
+type ActivePanel = 'none' | 'controls' | 'intelligence' | 'area-intel';
 
 const MapFirstLayout = () => {
   const { isTravelerMode, setTravelerMode, selectedEntity, clearSelection } = useDashboard();
@@ -277,12 +279,37 @@ const MapFirstLayout = () => {
           </Suspense>
         )}
 
-        {/* CONTEXT DRAWER */}
-        {selectedEntity && (
+        {/* CONTEXT DRAWER — non-area entities */}
+        {selectedEntity && selectedEntity.type !== 'area' && (
           <ContextDrawer
             entity={selectedEntity}
             onClose={clearSelection}
           />
+        )}
+
+        {/* AREA INTELLIGENCE DRAWER — z-40, right-aligned sliding panel */}
+        <AreaIntelligenceDrawer
+          isOpen={activePanel === 'area-intel'}
+          onClose={() => setActivePanel('none')}
+        />
+
+        {/* AREA INTEL TOGGLE — floating button on map */}
+        {!isTravelerMode && (
+          <button
+            onClick={() => togglePanel('area-intel')}
+            className={cn(
+              "fixed bottom-20 left-4 z-30",
+              "flex items-center gap-2 px-3 py-2",
+              "rounded-lg shadow-lg transition-all duration-200",
+              "md:bottom-4 md:left-auto md:right-4",
+              activePanel === 'area-intel'
+                ? "bg-primary text-primary-foreground"
+                : "bg-card/90 text-foreground border border-border/50 hover:border-primary/50"
+            )}
+          >
+            <Crosshair className="w-4 h-4" />
+            <span className="text-xs font-mono font-medium uppercase tracking-wider">Area Intel</span>
+          </button>
         )}
       </div>
     </div>
