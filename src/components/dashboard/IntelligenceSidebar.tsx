@@ -148,7 +148,7 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
   }
 
   return (
-    <div className="h-full flex flex-col space-y-2.5 overflow-hidden">
+    <div className="h-full flex flex-col gap-4 overflow-hidden">
       {/* Search Section - Report button removed (exists in global nav) */}
       <div className="flex-shrink-0 relative">
         <div className={cn(
@@ -223,16 +223,21 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
 
       {/* Quick Access Pills */}
       {!selectedSuburb && !loading && (
-        <div className="flex-shrink-0 flex flex-wrap gap-1.5">
-          {quickAccessSuburbs.map(suburb => (
-            <button
-              key={suburb.id}
-              onClick={() => handleSelectSuburb(suburb)}
-              className="px-2 py-1 rounded text-[10px] font-mono font-medium bg-card/40 border border-border/40 hover:border-primary/40 hover:bg-primary/10 active:scale-95 transition-all"
-            >
-              {suburb.suburb_name}
-            </button>
-          ))}
+        <div className="flex-shrink-0">
+          <h3 className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
+            Quick Access
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {quickAccessSuburbs.map(suburb => (
+              <button
+                key={suburb.id}
+                onClick={() => handleSelectSuburb(suburb)}
+                className="px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-medium bg-card/40 border border-border/40 hover:border-primary/40 hover:bg-primary/10 active:scale-95 transition-all"
+              >
+                {suburb.suburb_name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -248,15 +253,17 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
         </div>
       )}
 
-      {/* Intelligence Tabs - Click to expand full screen */}
+      {/* Intelligence Tabs */}
       <div 
-        className="flex-shrink-0 bg-card/60 backdrop-blur-sm rounded-lg border border-border/40 p-1"
+        className="flex-shrink-0 bg-card/60 backdrop-blur-sm rounded-xl border border-border/30 p-3"
         role="navigation"
         aria-label="Intelligence panels - click to expand"
       >
-        <div className="grid grid-cols-7 gap-1">
+        <h3 className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2.5">
+          Intelligence Modules
+        </h3>
+        <div className="grid grid-cols-4 gap-2">
           {(Object.keys(tabConfig) as TabType[]).map((tab) => {
-            const config = tabConfig[tab];
             const icons: Record<TabType, React.ReactNode> = {
               executive: <Activity className="w-3.5 h-3.5" />,
               neighborhoods: <Building className="w-3.5 h-3.5" />,
@@ -281,7 +288,7 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
                 key={tab}
                 onClick={() => setExpandedTab(tab)}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 p-2 rounded-md transition-all",
+                  "flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-lg transition-all",
                   "bg-background/50 border border-border/30 hover:border-primary/50 hover:bg-primary/10",
                   "focus:ring-2 focus:ring-primary/50 focus:outline-none",
                   "group"
@@ -297,21 +304,18 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
             );
           })}
         </div>
-        <p className="text-[9px] text-center text-muted-foreground mt-1.5 font-mono">
-          Click to expand full view
-        </p>
       </div>
 
       {/* Environmental Context Cluster */}
       <div className="flex-shrink-0">
-        <h3 className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
+        <h3 className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2.5 px-1">
           Environmental Context
         </h3>
-        <EnvironmentalCluster className="mb-3" />
+        <EnvironmentalCluster />
       </div>
 
-      {/* Scrollable Content Area - always visible scrollbar */}
-      <div className="flex-1 overflow-y-auto space-y-3 scrollbar-visible pb-4">
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto space-y-4 scrollbar-visible pb-4">
         <SectorReport 
           suburb={selectedSuburb} 
           onClose={handleCloseSuburb}
