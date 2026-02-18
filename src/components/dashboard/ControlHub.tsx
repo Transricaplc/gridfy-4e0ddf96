@@ -110,11 +110,11 @@ const ControlHub = memo(({
         <div className={cn(
           "bg-card/98 backdrop-blur-xl overflow-hidden will-change-auto",
           isInline 
-            ? "rounded-xl border border-border/40" 
-            : "rounded-xl border border-border/50 shadow-2xl shadow-black/30"
+            ? "rounded-xl border border-border/30" 
+            : "rounded-xl border border-border/30 shadow-2xl shadow-black/30"
         )}>
           {/* Tab Header */}
-          <div className="flex items-center justify-between p-[0.75rem] border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent rounded-t-xl">
+          <div className="flex items-center justify-between p-3 border-b border-border/20 bg-gradient-to-r from-primary/10 to-transparent rounded-t-xl">
             <div className="flex items-center gap-1">
               {tabs.map((tab) => (
                 <button
@@ -148,7 +148,7 @@ const ControlHub = memo(({
             isInline ? "max-h-[calc(100vh-16rem)]" : "max-h-[40vh] md:max-h-[50vh]"
           )}>
             {activeTab === 'layers' && (
-              <div className="p-[1rem] space-y-3">
+              <div className="p-4 space-y-4">
                 <LayerGroup title="Safety" icon={<Shield className="w-3 h-3" />} layers={safetyLayers} onToggle={onToggleLayer} />
                 <LayerGroup title="Infrastructure" icon={<Grid3X3 className="w-3 h-3" />} layers={infrastructureLayers} onToggle={onToggleLayer} />
                 {operationsLayers.length > 0 && (
@@ -158,7 +158,7 @@ const ControlHub = memo(({
             )}
 
             {activeTab === 'filters' && (
-              <div className="p-[1rem] space-y-4">
+              <div className="p-4 space-y-5">
                 <div>
                   <h4 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
                     <Clock className="w-3 h-3" /> Time Range
@@ -205,7 +205,7 @@ const ControlHub = memo(({
             )}
 
             {activeTab === 'search' && (
-              <div className="p-[1rem]">
+              <div className="p-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -239,7 +239,7 @@ const ControlHub = memo(({
           </div>
 
           {/* Footer */}
-          <div className="px-[1rem] py-2 border-t border-border/30 bg-muted/10 flex items-center justify-between rounded-b-xl">
+          <div className="px-4 py-2.5 border-t border-border/20 bg-muted/10 flex items-center justify-between rounded-b-xl">
             <span className="text-[10px] font-mono text-muted-foreground">
               {enabledCount} layers active
             </span>
@@ -263,10 +263,10 @@ const LayerGroup = memo(({ title, icon, layers, onToggle }: {
   title: string; icon: React.ReactNode; layers: LayerConfig[]; onToggle: (id: string) => void 
 }) => (
   <div>
-    <h4 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
+    <h4 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
       {icon} {title}
     </h4>
-    <div className="grid grid-cols-2 gap-1.5">
+    <div className="grid grid-cols-2 gap-2">
       {layers.map((layer) => (
         <LayerButton key={layer.id} layer={layer} onToggle={onToggle} />
       ))}
@@ -282,7 +282,7 @@ const LayerButton = memo(({ layer, onToggle }: { layer: LayerConfig; onToggle: (
     <button
       onClick={() => onToggle(layer.id)}
       className={cn(
-        "flex items-center gap-2 p-2 rounded-xl border transition-colors text-left",
+        "flex items-center gap-2 p-2.5 rounded-xl border transition-colors text-left",
         layer.enabled
           ? "bg-primary/10 border-primary/40"
           : "bg-muted/20 border-border/30 hover:border-primary/30"

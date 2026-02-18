@@ -105,14 +105,14 @@ const MapFirstLayout = () => {
         connectionStatus="connected"
       />
 
-      {/* MAIN CONTENT — 12-column grid */}
-      <div className="flex-1 overflow-hidden grid grid-cols-12 gap-0 relative">
+      {/* MAIN CONTENT — 12-column grid with consistent gaps */}
+      <div className="flex-1 overflow-hidden grid grid-cols-12 gap-3 p-3 relative">
         
         {/* LEFT SIDEBAR — Navigation & Controls (col-span-3 or collapsed) */}
         {showLeftSidebar && (
           <aside className={cn(
-            "relative z-30 flex flex-col bg-card/95 backdrop-blur-xl border-r border-border/50",
-            "transition-all duration-300 ease-out overflow-hidden",
+            "relative z-30 flex flex-col bg-card/95 backdrop-blur-xl rounded-xl border border-border/30",
+            "transition-all duration-300 ease-out overflow-hidden shadow-sm",
             leftCollapsed ? "col-span-1 w-14" : "col-span-3"
           )}>
             {/* Collapse toggle */}
@@ -129,10 +129,10 @@ const MapFirstLayout = () => {
 
             {leftCollapsed ? (
               /* Collapsed: icon-only strip */
-              <div className="flex flex-col items-center gap-2 pt-12 p-2">
+              <div className="flex flex-col items-center gap-3 pt-12 p-2">
                 <button
                   onClick={() => { setLeftCollapsed(false); togglePanel('controls'); }}
-                  className="p-2 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/40 border border-border/30 transition-colors"
+                  className="p-2.5 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/40 border border-border/30 transition-colors"
                   title="Controls"
                 >
                   <Shield className="w-4 h-4 text-primary" />
@@ -140,7 +140,7 @@ const MapFirstLayout = () => {
               </div>
             ) : (
               /* Expanded: full control hub */
-              <div className="flex-1 overflow-hidden p-[1.5rem] pt-10">
+              <div className="flex-1 overflow-hidden p-4 pt-10">
                 <ControlHub
                   layers={layers}
                   onToggleLayer={handleToggleLayer}
@@ -173,8 +173,8 @@ const MapFirstLayout = () => {
               )
             : "col-span-12"
         )}>
-          <div className="absolute inset-0 p-1.5">
-            <div className="w-full h-full rounded-xl overflow-hidden border border-border/30">
+          <div className="absolute inset-0">
+            <div className="w-full h-full rounded-xl overflow-hidden border border-border/30 shadow-sm">
               <MapFirstView
                 fullHeight
                 onMapInteraction={handleMapInteraction}
@@ -203,8 +203,8 @@ const MapFirstLayout = () => {
         {/* RIGHT SIDEBAR — Intelligence Panel (col-span-3 or collapsed) */}
         {showRightSidebar && (
           <aside className={cn(
-            "relative z-20 flex flex-col bg-card/95 backdrop-blur-xl border-l border-border/50",
-            "transition-all duration-300 ease-out overflow-hidden",
+            "relative z-20 flex flex-col bg-card/95 backdrop-blur-xl rounded-xl border border-border/30",
+            "transition-all duration-300 ease-out overflow-hidden shadow-sm",
             rightCollapsed ? "col-span-1 w-14" : "col-span-3"
           )}>
             {/* Collapse toggle */}
@@ -221,10 +221,10 @@ const MapFirstLayout = () => {
 
             {rightCollapsed ? (
               /* Collapsed: icon-only strip */
-              <div className="flex flex-col items-center gap-2 pt-12 p-2">
+              <div className="flex flex-col items-center gap-3 pt-12 p-2">
                 <button
                   onClick={() => setRightCollapsed(false)}
-                  className="p-2 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/40 border border-border/30 transition-colors"
+                  className="p-2.5 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/40 border border-border/30 transition-colors"
                   title="Intelligence"
                 >
                   <Menu className="w-4 h-4 text-primary" />
@@ -232,7 +232,7 @@ const MapFirstLayout = () => {
               </div>
             ) : (
               /* Expanded: full intelligence sidebar */
-              <div className="flex-1 overflow-hidden p-[1.5rem] pt-10">
+              <div className="flex-1 overflow-hidden p-4 pt-10">
                 <Suspense fallback={
                   <div className="flex-1 flex items-center justify-center">
                     <span className="text-xs text-muted-foreground font-mono">Loading…</span>
