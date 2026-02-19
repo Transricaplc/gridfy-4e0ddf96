@@ -1,6 +1,13 @@
-import { memo, useState } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { Phone, MapPin, Clock, ChevronDown, ChevronUp, Shield, Crown, Lock } from 'lucide-react';
+import {
+  Phone, MapPin, Clock, ChevronDown, ChevronUp, Shield, Crown, Lock,
+  Search, Flame, AlertTriangle, Zap, Filter, X
+} from 'lucide-react';
+import {
+  westernCapeDirectory, getEmergencyContacts, searchDirectory, PROVINCE_WIDE,
+  type SuburbEmergencyEntry, type EmergencyContactsResult,
+} from '@/data/westernCapeEmergencyDirectory';
 import type { ViewId } from '../GridifyDashboard';
 
 interface Props {
@@ -8,142 +15,262 @@ interface Props {
   onNavigate: (view: ViewId) => void;
 }
 
-const sections = [
-  {
-    title: 'Police Stations',
-    items: [
-      { name: 'Cape Town Central Police Station', phone: '021 467 8400', address: '5 Buitenkant Street, Cape Town City Centre, 8001', hours: 'Open 24/7', score: 8.5 },
-      { name: 'Sea Point SAPS', phone: '021 430 4100', address: '60 Regent Road, Sea Point, 8005', hours: 'Open 24/7', score: 8.2 },
-      { name: 'Camps Bay SAPS', phone: '021 438 5202', address: 'Victoria Road, Camps Bay, 8040', hours: 'Open 24/7', score: 8.8 },
-      { name: 'Woodstock SAPS', phone: '021 442 4200', address: '30 Roodebloem Road, Woodstock, 7925', hours: 'Open 24/7', score: 7.0 },
-      { name: 'Claremont SAPS', phone: '021 657 3400', address: 'Dreyer Street, Claremont, 7708', hours: 'Open 24/7', score: 7.5 },
-    ],
-  },
-  {
-    title: 'Hospitals & Medical',
-    items: [
-      { name: 'Groote Schuur Hospital', phone: '021 404 9111', address: 'Main Road, Observatory, 7925', hours: '24hr Emergency', score: 8.0, extra: 'Public · Trauma Unit · Cardiac' },
-      { name: 'Netcare Christiaan Barnard Memorial', phone: '021 441 0000', address: '181 Longmarket Street, Cape Town, 8001', hours: '24hr Emergency', score: 9.0, extra: 'Private · Full ICU · Cardiac' },
-      { name: 'Mediclinic Cape Town', phone: '021 464 5500', address: '21 Hof Street, Oranjezicht, 8001', hours: '24hr Emergency', score: 8.8, extra: 'Private · General Surgery' },
-      { name: 'Red Cross War Memorial Children\'s Hospital', phone: '021 658 5111', address: 'Klipfontein Road, Rondebosch, 7700', hours: '24hr Paediatric Emergency', score: 8.5, extra: 'Public · Children Only' },
-    ],
-  },
-  {
-    title: 'Fire & Rescue',
-    items: [
-      { name: 'City of Cape Town Fire & Rescue', phone: '021 535 1100', address: 'Roeland Street, Cape Town, 8001', hours: '24/7', score: 8.5, extra: 'Response time: ~8 min avg' },
-      { name: 'Table Bay Fire Station', phone: '021 417 5000', address: 'Marine Drive, Table Bay, 8001', hours: '24/7', score: 8.8 },
-    ],
-  },
-  {
-    title: 'Mountain Rescue',
-    items: [
-      { name: 'Wilderness Search and Rescue (WSAR)', phone: '021 948 9900', address: 'SANParks Headquarters, Table Mountain National Park, 8001', hours: '24/7', score: 9.0, extra: 'Helicopter available · Covers all WC mountains' },
-    ],
-  },
-  {
-    title: '24-Hour Pharmacies',
-    items: [
-      { name: 'Clicks Pharmacy V&A Waterfront', phone: '021 419 5380', address: 'Shop 148, Victoria Wharf, V&A Waterfront, 8001', hours: 'Open 24/7', score: 9.2 },
-      { name: 'Dis-Chem Pharmacy Canal Walk', phone: '021 555 3770', address: 'Canal Walk Shopping Centre, Century City, 7441', hours: 'Open until 10pm', score: 8.5 },
-    ],
-  },
-  {
-    title: 'Roadside Assistance',
-    items: [
-      { name: 'AA South Africa', phone: '0861 000 234', address: 'AA House, 66 Ernest Oppenheimer Ave, Bruma, 2026', hours: '24/7 Nationwide', score: 8.0 },
-    ],
-  },
-  {
-    title: 'Embassies & Consulates',
-    items: [
-      { name: 'US Consulate General', phone: '021 702 7300', address: '2 Reddam Avenue, Westlake, 7945', hours: 'Mon-Fri 7:30-16:00', score: 9.0, extra: 'Emergency: 021 702 7300' },
-      { name: 'British High Commission', phone: '021 405 2400', address: '15th Floor, Norton Rose House, 8 Riebeek St, 8001', hours: 'Mon-Fri 8:00-16:30', score: 9.0, extra: 'Emergency: +44 20 7008 5000' },
-      { name: 'German Consulate', phone: '021 405 3000', address: '19th Floor, Safmarine House, 22 Riebeek St, 8001', hours: 'Mon-Fri 9:00-12:00', score: 9.0 },
-    ],
-  },
-  {
-    title: 'Crisis Support',
-    items: [
-      { name: 'SADAG Depression & Anxiety Helpline', phone: '0800 567 567', address: 'Toll-free National Service', hours: '24/7', score: 0 },
-      { name: 'GBV Command Centre', phone: '0800 428 428', address: 'Toll-free National Service', hours: '24/7', score: 0 },
-    ],
-  },
+// ── Filter categories ──
+type FilterCategory = 'ALL' | 'POLICE' | 'FIRE' | 'HOSPITAL' | 'UTILITY';
+
+const FILTER_TABS: { id: FilterCategory; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
+  { id: 'ALL', label: 'All', icon: Phone, color: 'text-foreground' },
+  { id: 'POLICE', label: 'Police', icon: Shield, color: 'text-[#2563eb]' },
+  { id: 'FIRE', label: 'Fire', icon: Flame, color: 'text-[#b91c1c]' },
+  { id: 'HOSPITAL', label: 'Hospital', icon: AlertTriangle, color: 'text-emerald-500' },
+  { id: 'UTILITY', label: 'Utility', icon: Zap, color: 'text-amber-500' },
 ];
 
-const EmergencyContactsView = memo(({ onUpgrade }: Props) => {
-  const [expanded, setExpanded] = useState<string[]>(['Police Stations']);
+// ── Universal numbers ──
+const UNIVERSAL_NUMBERS = [
+  { name: 'General Emergency (Mobile)', number: '112', color: 'border-destructive/40 bg-destructive/10' },
+  { name: 'General Emergency (Landline)', number: '107', color: 'border-destructive/40 bg-destructive/10' },
+  { name: 'SAPS National', number: '10111', color: 'border-[#2563eb]/40 bg-[#2563eb]/10' },
+  { name: 'Ambulance / Fire', number: '10177', color: 'border-[#b91c1c]/40 bg-[#b91c1c]/10' },
+  { name: 'CT Metro Police', number: '0860 765 423', color: 'border-[#2563eb]/30 bg-[#2563eb]/5' },
+  { name: 'Mountain / Sea Rescue', number: '021 937 0300', color: 'border-amber-500/30 bg-amber-500/5' },
+];
 
-  const toggle = (title: string) => {
-    setExpanded(prev => prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]);
-  };
+// ── Click-to-call chip ──
+const CallChip = memo(({ name, number, colorClass }: { name: string; number: string; colorClass: string }) => (
+  <a
+    href={`tel:${number.replace(/\s/g, '')}`}
+    className={cn(
+      'flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-all hover:scale-[1.02] active:scale-[0.98]',
+      colorClass
+    )}
+  >
+    <Phone className="w-3.5 h-3.5 shrink-0 text-foreground" />
+    <div className="flex-1 min-w-0">
+      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground truncate">{name}</div>
+      <div className="text-sm font-bold font-mono tabular-nums text-foreground">{number}</div>
+    </div>
+  </a>
+));
+CallChip.displayName = 'CallChip';
+
+// ── Suburb contact card (expanded) ──
+const SuburbContactCard = memo(({ contacts, filter }: { contacts: EmergencyContactsResult; filter: FilterCategory }) => {
+  const showSAPS = filter === 'ALL' || filter === 'POLICE';
+  const showFire = filter === 'ALL' || filter === 'FIRE';
+  const showMedical = filter === 'ALL' || filter === 'HOSPITAL';
+  const showUtility = filter === 'ALL' || filter === 'UTILITY';
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Emergency Contacts</h1>
-        <p className="text-muted-foreground mt-1">All contacts with full physical addresses</p>
-      </div>
-
-      {/* National Emergency */}
-      <div className="p-6 rounded-xl border-2 border-safety-red bg-card">
-        <div className="text-center">
-          <div className="text-4xl font-black text-safety-red mb-1">🚨 10111</div>
-          <div className="text-lg font-bold text-foreground">Emergency Services</div>
-          <div className="text-sm text-muted-foreground mb-4">Police, Fire, Medical · 24/7</div>
-          <a href="tel:10111" className="inline-flex px-8 py-3 rounded-xl bg-safety-red text-white font-bold text-sm hover:opacity-90 transition-opacity">
-            📞 CALL NOW
-          </a>
+    <div className="rounded-xl border border-primary/30 bg-card overflow-hidden animate-fade-in">
+      <div className="px-4 py-3 bg-primary/5 border-b border-primary/20">
+        <div className="flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-primary" />
+          <span className="font-bold text-foreground">{contacts.suburb}</span>
+          <span className="text-xs font-mono text-muted-foreground">({contacts.postalCode})</span>
         </div>
       </div>
 
-      {/* Sections */}
-      {sections.map(section => {
-        const isOpen = expanded.includes(section.title);
-        return (
-          <div key={section.title} className="rounded-xl border border-border bg-card overflow-hidden">
-            <button
-              onClick={() => toggle(section.title)}
-              className="w-full flex items-center justify-between p-5 text-left hover:bg-accent/50 transition-colors"
-            >
-              <span className="text-base font-semibold text-foreground">{section.title}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">{section.items.length}</span>
-                {isOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-              </div>
-            </button>
-            {isOpen && (
-              <div className="border-t border-border divide-y divide-border">
-                {section.items.map(item => (
-                  <div key={item.name} className="p-5">
-                    <h4 className="text-sm font-bold text-foreground mb-2">{item.name}</h4>
-                    <div className="space-y-1.5 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 shrink-0" /> {item.phone}</div>
-                      <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" /> {item.address}</div>
-                      <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5 shrink-0" /> {item.hours}</div>
-                      {item.extra && <div className="text-xs text-muted-foreground">{item.extra}</div>}
-                    </div>
-                    {item.score > 0 && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <Shield className="w-3.5 h-3.5 text-primary" />
-                        <span className="text-xs text-muted-foreground">Safety Score: {item.score}</span>
-                      </div>
-                    )}
-                    <div className="flex gap-3 mt-3">
-                      <a href={`tel:${item.phone.replace(/\s/g, '')}`} className="text-xs font-semibold text-primary hover:underline">Call</a>
-                      <button className="text-xs text-muted-foreground hover:underline">Directions</button>
-                      <button className="text-xs text-muted-foreground hover:underline">Save Contact</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      <div className="p-4 space-y-4">
+        {/* SAPS */}
+        {showSAPS && (
+          <div className="space-y-1.5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.08em] font-bold text-[#2563eb]">[SAPS CONTACTS]</div>
+            <CallChip name={contacts.saps.station} number={contacts.saps.phone} colorClass="border-[#2563eb]/30 bg-[#2563eb]/5" />
+            {contacts.saps.clusterHQ && (
+              <CallChip name={`Cluster HQ: ${contacts.saps.clusterHQ}`} number={contacts.saps.clusterPhone!} colorClass="border-[#2563eb]/20 bg-[#2563eb]/5" />
             )}
+            <CallChip name="National Crime Stop" number={contacts.saps.nationalCrimeStop} colorClass="border-[#2563eb]/20 bg-[#2563eb]/5" />
+            <CallChip name="CT Metro Police" number="0860 765 423" colorClass="border-[#2563eb]/15 bg-card" />
           </div>
-        );
-      })}
+        )}
+
+        {/* Fire */}
+        {showFire && (
+          <div className="space-y-1.5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.08em] font-bold text-[#b91c1c]">[FIRE & RESCUE]</div>
+            <CallChip name={contacts.fire.station} number={contacts.fire.phone} colorClass="border-[#b91c1c]/30 bg-[#b91c1c]/5" />
+            <CallChip name="WSAR Mountain Rescue" number={contacts.fire.wsar} colorClass="border-[#b91c1c]/20 bg-[#b91c1c]/5" />
+            <CallChip name="NSRI Sea Rescue" number={contacts.fire.nsri} colorClass="border-[#b91c1c]/15 bg-card" />
+          </div>
+        )}
+
+        {/* Medical */}
+        {showMedical && (
+          <div className="space-y-1.5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.08em] font-bold text-emerald-500">[MEDICAL INTELLIGENCE]</div>
+            <CallChip name={`Public: ${contacts.medical.publicHospital}`} number={contacts.medical.publicPhone} colorClass="border-emerald-500/30 bg-emerald-500/5" />
+            {contacts.medical.privateClinic && (
+              <CallChip name={`Private: ${contacts.medical.privateClinic}`} number={contacts.medical.privatePhone!} colorClass="border-emerald-500/20 bg-emerald-500/5" />
+            )}
+            <CallChip name="Metro EMS Ambulance" number={contacts.medical.metroEMS} colorClass="border-emerald-500/15 bg-card" />
+            <CallChip name="ER24" number={contacts.medical.er24} colorClass="border-emerald-500/15 bg-card" />
+            <CallChip name="Netcare 911" number={contacts.medical.netcare911} colorClass="border-emerald-500/15 bg-card" />
+          </div>
+        )}
+
+        {/* Utility */}
+        {showUtility && (
+          <div className="space-y-1.5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.08em] font-bold text-amber-500">[UTILITY & CIVIC]</div>
+            <CallChip name="Eskom Loadshedding" number="0860 037 566" colorClass="border-amber-500/20 bg-amber-500/5" />
+            <CallChip name="Water / Burst Pipe" number="0860 103 089" colorClass="border-amber-500/20 bg-amber-500/5" />
+            <CallChip name="CoCT Service Desk" number="0860 103 089" colorClass="border-amber-500/15 bg-card" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+SuburbContactCard.displayName = 'SuburbContactCard';
+
+const EmergencyContactsView = memo(({ onUpgrade }: Props) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<FilterCategory>('ALL');
+  const [selectedContacts, setSelectedContacts] = useState<EmergencyContactsResult | null>(null);
+
+  const searchResults = useMemo(() => searchDirectory(searchQuery), [searchQuery]);
+
+  const handleSelect = (entry: SuburbEmergencyEntry) => {
+    const contacts = getEmergencyContacts(entry.suburb);
+    setSelectedContacts(contacts);
+    setSearchQuery('');
+  };
+
+  return (
+    <div className="space-y-5 animate-fade-in">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Emergency Contacts</h1>
+        <p className="text-muted-foreground mt-1">Universal directory — {westernCapeDirectory.length} Western Cape suburbs</p>
+      </div>
+
+      {/* ── Universal Emergency Numbers ── */}
+      <div className="p-4 rounded-xl border-2 border-destructive/40 bg-card">
+        <div className="text-[10px] font-mono uppercase tracking-wider font-bold text-destructive mb-3">
+          [UNIVERSAL EMERGENCY — ALWAYS AVAILABLE]
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {UNIVERSAL_NUMBERS.map(n => (
+            <a
+              key={n.number}
+              href={`tel:${n.number.replace(/\s/g, '')}`}
+              className={cn(
+                'flex flex-col items-center p-3 rounded-lg border transition-all hover:scale-[1.02] active:scale-[0.98] text-center',
+                n.color
+              )}
+            >
+              <div className="text-lg font-black font-mono tabular-nums text-foreground">{n.number}</div>
+              <div className="text-[10px] text-muted-foreground font-mono uppercase mt-0.5">{n.name}</div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Search ── */}
+      <div className="relative">
+        <div className="flex items-center bg-card rounded-xl border-2 border-border px-4 py-3 focus-within:border-primary transition-colors">
+          <Search className="w-4 h-4 mr-3 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search suburb name or postal code (e.g., Claremont, 7708)..."
+            className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} className="p-1 rounded hover:bg-background transition-colors">
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
+        </div>
+
+        {searchQuery && searchResults.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl border-2 border-border shadow-2xl overflow-hidden z-50 animate-fade-in max-h-64 overflow-y-auto">
+            {searchResults.map(entry => (
+              <button
+                key={entry.suburb}
+                onClick={() => handleSelect(entry)}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-primary/10 transition-colors text-left border-b border-border/30 last:border-0"
+              >
+                <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-foreground text-sm truncate">{entry.suburb}</div>
+                  <div className="text-[10px] text-muted-foreground font-mono">{entry.postalCode} · {entry.saps.station}</div>
+                </div>
+                <Shield className="w-3.5 h-3.5 text-[#2563eb]" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {searchQuery && searchResults.length === 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl border-2 border-border shadow-2xl p-4 text-center z-50 animate-fade-in">
+            <MapPin className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+            <div className="text-sm text-muted-foreground">No suburbs found for "{searchQuery}"</div>
+            <div className="text-xs text-muted-foreground mt-1">Default: WC Emergency <span className="font-mono font-bold">107</span></div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Quick Filter ── */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+        <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        {FILTER_TABS.map(tab => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setFilter(tab.id)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all shrink-0',
+                filter === tab.id
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card text-muted-foreground border-border hover:border-primary/40'
+              )}
+            >
+              <Icon className={cn('w-3 h-3', filter === tab.id ? 'text-primary-foreground' : tab.color)} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Selected Suburb Card ── */}
+      {selectedContacts && (
+        <div className="relative">
+          <button
+            onClick={() => setSelectedContacts(null)}
+            className="absolute top-3 right-3 p-1 rounded hover:bg-background/50 z-10"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <SuburbContactCard contacts={selectedContacts} filter={filter} />
+        </div>
+      )}
+
+      {/* ── Quick Access: Popular Suburbs ── */}
+      {!selectedContacts && (
+        <div className="space-y-3">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Quick Access — Key Hubs</div>
+          <div className="flex flex-wrap gap-2">
+            {['Cape Town CBD', 'Sea Point', 'Camps Bay', 'Bellville', 'Stellenbosch', 'George', 'Khayelitsha', 'Hermanus', 'Atlantis', 'Paarl'].map(name => (
+              <button
+                key={name}
+                onClick={() => {
+                  const contacts = getEmergencyContacts(name);
+                  if (contacts) setSelectedContacts(contacts);
+                }}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all"
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Elite */}
-      <div className="p-6 rounded-xl border border-border bg-card">
+      <div className="p-5 rounded-xl border border-border bg-card">
         <div className="flex items-center gap-2 mb-3">
           <Lock className="w-5 h-5 text-elite-from" />
           <h3 className="font-bold text-foreground">Save Personal Emergency Contacts</h3>
