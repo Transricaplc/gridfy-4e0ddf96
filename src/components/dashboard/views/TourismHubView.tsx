@@ -71,7 +71,7 @@ const attractions: Attraction[] = [
     rating: 4.7,
     sustainabilityScore: 88,
     aiTip: 'Book 2 days ahead — 80% chance of sell-out tomorrow',
-    photo: 'https://images.unsplash.com/photo-1591121060175-5523370a3f78?w=600&h=400&fit=crop',
+    photo: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600&h=400&fit=crop&q=80',
   },
   {
     id: 'atlantis-dunes',
@@ -242,7 +242,7 @@ const attractions: Attraction[] = [
     rating: 4.4,
     sustainabilityScore: 88,
     aiTip: 'Best photos early morning — fewer tour groups',
-    photo: 'https://images.unsplash.com/photo-1580746738099-d0b8e4c4f2eb?w=600&h=400&fit=crop',
+    photo: 'https://images.unsplash.com/photo-1588694955897-e6018028a8f2?w=600&h=400&fit=crop',
   },
   {
     id: 'camps-bay',
@@ -318,7 +318,7 @@ const attractions: Attraction[] = [
     rating: 4.6,
     sustainabilityScore: 92,
     aiTip: 'Guided tours at 10:00 & 14:00 — highly recommended',
-    photo: 'https://images.unsplash.com/photo-1580746738099-d0b8e4c4f2eb?w=600&h=400&fit=crop',
+    photo: 'https://images.unsplash.com/photo-1590608585498-dca0bfb8becd?w=600&h=400&fit=crop',
   },
   {
     id: 'constantia-glen',
