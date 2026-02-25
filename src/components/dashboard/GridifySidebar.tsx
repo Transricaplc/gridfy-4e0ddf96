@@ -5,7 +5,8 @@ import ThemeToggle from '@/components/ThemeToggle';
 import {
   Home, BarChart3, MapPin, Clock, Target, Car, Mountain,
   Phone, Briefcase, Users, Bell, Settings, Crown, Shield, User, X,
-  TrafficCone, Lightbulb, Plane, Landmark, TrendingUp, Leaf, Accessibility, Moon
+  TrafficCone, Lightbulb, Plane, Landmark, TrendingUp, Leaf, Accessibility, Moon,
+  Wrench, Gauge, Activity, FileCheck, CloudRain, Factory, Zap, MessageCircle, HeartHandshake, Award
 } from 'lucide-react';
 import type { ViewId } from './GridifyDashboard';
 
@@ -18,27 +19,61 @@ interface GridifySidebarProps {
   isMobile: boolean;
 }
 
-const menuItems: { id: ViewId; label: string; icon: typeof Home; elite?: boolean }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'safety-overview', label: 'Safety Overview', icon: BarChart3 },
-  { id: 'areas', label: 'Areas & Zones', icon: MapPin },
-  { id: 'time-analytics', label: 'Time Analytics', icon: Clock },
-  { id: 'activities', label: 'Safe Activities', icon: Target },
-  { id: 'rideshare', label: 'Ride Share Zones', icon: Car },
-  { id: 'trails', label: 'Trail Safety', icon: Mountain },
-  { id: 'emergency', label: 'Emergency Contacts', icon: Phone },
-  { id: 'pro-tools', label: 'Professional Tools', icon: Briefcase, elite: true },
-  { id: 'community', label: 'Community Intel', icon: Users },
-  { id: 'alerts', label: 'Alerts & Notifications', icon: Bell, elite: true },
-  { id: 'traffic', label: 'Traffic & Transport', icon: TrafficCone },
-  { id: 'utilities', label: 'Utilities & Services', icon: Lightbulb },
-  { id: 'airport', label: 'Airport Info', icon: Plane },
-  { id: 'government', label: 'Government Services', icon: Landmark },
-  { id: 'predictive', label: 'Predictive Analytics', icon: TrendingUp },
-  { id: 'biodiversity', label: 'Biodiversity Monitor', icon: Leaf },
-  { id: 'accessibility', label: 'Accessibility Auditor', icon: Accessibility },
-  { id: 'night-economy', label: 'Night Economy', icon: Moon },
-  { id: 'settings', label: 'Settings', icon: Settings },
+const menuGroups: { label: string; items: { id: ViewId; label: string; icon: typeof Home; elite?: boolean }[] }[] = [
+  {
+    label: 'Core',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: Home },
+      { id: 'safety-overview', label: 'Safety Overview', icon: BarChart3 },
+      { id: 'areas', label: 'Areas & Zones', icon: MapPin },
+      { id: 'time-analytics', label: 'Time Analytics', icon: Clock },
+      { id: 'activities', label: 'Safe Activities', icon: Target },
+      { id: 'rideshare', label: 'Ride Share Zones', icon: Car },
+      { id: 'trails', label: 'Trail Safety', icon: Mountain },
+      { id: 'emergency', label: 'Emergency Contacts', icon: Phone },
+      { id: 'pro-tools', label: 'Professional Tools', icon: Briefcase, elite: true },
+      { id: 'community', label: 'Community Intel', icon: Users },
+      { id: 'alerts', label: 'Alerts & Notifications', icon: Bell, elite: true },
+    ],
+  },
+  {
+    label: 'City Services',
+    items: [
+      { id: 'traffic', label: 'Traffic & Transport', icon: TrafficCone },
+      { id: 'utilities', label: 'Utilities & Services', icon: Lightbulb },
+      { id: 'airport', label: 'Airport Info', icon: Plane },
+      { id: 'government', label: 'Government Services', icon: Landmark },
+    ],
+  },
+  {
+    label: 'Intelligence',
+    items: [
+      { id: 'predictive', label: 'Predictive Analytics', icon: TrendingUp },
+      { id: 'biodiversity', label: 'Biodiversity Monitor', icon: Leaf },
+      { id: 'accessibility', label: 'Accessibility Auditor', icon: Accessibility },
+      { id: 'night-economy', label: 'Night Economy', icon: Moon },
+    ],
+  },
+  {
+    label: 'Advanced Operations',
+    items: [
+      { id: 'pred-maintenance', label: 'Predictive Maintenance', icon: Wrench },
+      { id: 'traffic-optimizer', label: 'Traffic Optimizer', icon: Gauge },
+      { id: 'exposure-tracker', label: 'Exposure Tracker', icon: Activity },
+      { id: 'permit-reviewer', label: 'AI Permit Reviewer', icon: FileCheck },
+      { id: 'microclimate', label: 'Microclimate & Flood', icon: CloudRain },
+      { id: 'carbon-dashboard', label: 'Carbon & Net-Zero', icon: Factory },
+      { id: 'utility-insights', label: 'Utility Insights', icon: Zap },
+      { id: 'volunteer-match', label: 'Volunteer Matching', icon: HeartHandshake },
+      { id: 'municipal-scorecard', label: 'Municipal Scorecard', icon: Award },
+    ],
+  },
+  {
+    label: '',
+    items: [
+      { id: 'settings', label: 'Settings', icon: Settings },
+    ],
+  },
 ];
 
 const GridifySidebar = memo(({ activeView, onNavigate, onUpgrade, isOpen, onToggle, isMobile }: GridifySidebarProps) => {
@@ -71,35 +106,44 @@ const GridifySidebar = memo(({ activeView, onNavigate, onUpgrade, isOpen, onTogg
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
-        <nav className="space-y-1">
-          {menuItems.map(item => {
-            const isActive = activeView === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3.5 py-3 rounded-lg text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-              >
-                <item.icon className="w-[18px] h-[18px] shrink-0" />
-                <span className="truncate">{item.label}</span>
-                {item.elite && (
-                  <span className={cn(
-                    "ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0",
-                    isActive
-                      ? "bg-primary-foreground/20 text-primary-foreground"
-                      : "bg-elite-gradient text-white"
-                  )}>
-                    👑
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        <nav className="space-y-4">
+          {menuGroups.map(group => (
+            <div key={group.label || 'misc'}>
+              {group.label && (
+                <div className="px-3.5 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">{group.label}</div>
+              )}
+              <div className="space-y-0.5">
+                {group.items.map(item => {
+                  const isActive = activeView === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => onNavigate(item.id)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      )}
+                    >
+                      <item.icon className="w-[18px] h-[18px] shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                      {item.elite && (
+                        <span className={cn(
+                          "ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0",
+                          isActive
+                            ? "bg-primary-foreground/20 text-primary-foreground"
+                            : "bg-elite-gradient text-white"
+                        )}>
+                          👑
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </ScrollArea>
 

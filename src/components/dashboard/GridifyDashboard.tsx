@@ -24,6 +24,16 @@ import PredictiveAnalyticsView from './views/PredictiveAnalyticsView';
 import BiodiversityView from './views/BiodiversityView';
 import AccessibilityView from './views/AccessibilityView';
 import NightEconomyView from './views/NightEconomyView';
+import PredictiveMaintenanceView from './views/PredictiveMaintenanceView';
+import TrafficOptimizerView from './views/TrafficOptimizerView';
+import ExposureTrackerView from './views/ExposureTrackerView';
+import PermitReviewerView from './views/PermitReviewerView';
+import MicroclimateView from './views/MicroclimateView';
+import CarbonDashboardView from './views/CarbonDashboardView';
+import UtilityInsightsView from './views/UtilityInsightsView';
+import VolunteerMatchView from './views/VolunteerMatchView';
+import MunicipalScorecardView from './views/MunicipalScorecardView';
+import CityChatbotWidget from './CityChatbotWidget';
 
 export type ViewId =
   | 'dashboard'
@@ -45,6 +55,15 @@ export type ViewId =
   | 'biodiversity'
   | 'accessibility'
   | 'night-economy'
+  | 'pred-maintenance'
+  | 'traffic-optimizer'
+  | 'exposure-tracker'
+  | 'permit-reviewer'
+  | 'microclimate'
+  | 'carbon-dashboard'
+  | 'utility-insights'
+  | 'volunteer-match'
+  | 'municipal-scorecard'
   | 'settings';
 
 const GridifyDashboard = memo(() => {
@@ -84,6 +103,15 @@ const GridifyDashboard = memo(() => {
       case 'biodiversity': return <BiodiversityView {...props} />;
       case 'accessibility': return <AccessibilityView {...props} />;
       case 'night-economy': return <NightEconomyView {...props} />;
+      case 'pred-maintenance': return <PredictiveMaintenanceView />;
+      case 'traffic-optimizer': return <TrafficOptimizerView />;
+      case 'exposure-tracker': return <ExposureTrackerView />;
+      case 'permit-reviewer': return <PermitReviewerView />;
+      case 'microclimate': return <MicroclimateView />;
+      case 'carbon-dashboard': return <CarbonDashboardView />;
+      case 'utility-insights': return <UtilityInsightsView />;
+      case 'volunteer-match': return <VolunteerMatchView />;
+      case 'municipal-scorecard': return <MunicipalScorecardView />;
       case 'settings': return <SettingsView {...props} />;
       default: return <DashboardView {...props} />;
     }
@@ -117,6 +145,9 @@ const GridifyDashboard = memo(() => {
           </div>
         </ScrollArea>
       </main>
+
+      {/* City Chatbot */}
+      <CityChatbotWidget />
 
       {/* Mobile hamburger */}
       {isMobile && !sidebarOpen && (
