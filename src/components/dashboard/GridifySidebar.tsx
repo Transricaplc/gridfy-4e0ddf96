@@ -69,6 +69,12 @@ const menuGroups: { label: string; items: { id: ViewId; label: string; icon: typ
     ],
   },
   {
+    label: 'Tourism',
+    items: [
+      { id: 'tourism-hub', label: 'Tourism Hub', icon: MapPin },
+    ],
+  },
+  {
     label: '',
     items: [
       { id: 'settings', label: 'Settings', icon: Settings },
@@ -93,8 +99,8 @@ const GridifySidebar = memo(({ activeView, onNavigate, onUpgrade, isOpen, onTogg
             <Shield className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-extrabold tracking-tight text-foreground leading-none">GRIDIFY</h1>
-            <p className="text-[11px] text-muted-foreground font-medium leading-none mt-0.5">Safety Intelligence</p>
+            <h1 className="text-lg font-extrabold tracking-tight text-foreground leading-none">Gridfy</h1>
+            <p className="text-[11px] text-muted-foreground font-medium leading-none mt-0.5">Cape Town Urban Intelligence</p>
           </div>
         </div>
         {isMobile && (

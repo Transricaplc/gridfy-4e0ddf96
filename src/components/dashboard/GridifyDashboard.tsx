@@ -33,6 +33,7 @@ import CarbonDashboardView from './views/CarbonDashboardView';
 import UtilityInsightsView from './views/UtilityInsightsView';
 import VolunteerMatchView from './views/VolunteerMatchView';
 import MunicipalScorecardView from './views/MunicipalScorecardView';
+import TourismHubView from './views/TourismHubView';
 import CityChatbotWidget from './CityChatbotWidget';
 
 export type ViewId =
@@ -64,6 +65,7 @@ export type ViewId =
   | 'utility-insights'
   | 'volunteer-match'
   | 'municipal-scorecard'
+  | 'tourism-hub'
   | 'settings';
 
 const GridifyDashboard = memo(() => {
@@ -112,6 +114,7 @@ const GridifyDashboard = memo(() => {
       case 'utility-insights': return <UtilityInsightsView />;
       case 'volunteer-match': return <VolunteerMatchView />;
       case 'municipal-scorecard': return <MunicipalScorecardView />;
+      case 'tourism-hub': return <TourismHubView />;
       case 'settings': return <SettingsView {...props} />;
       default: return <DashboardView {...props} />;
     }

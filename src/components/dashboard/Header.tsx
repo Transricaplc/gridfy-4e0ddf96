@@ -71,10 +71,10 @@ const Header = ({ isTravelerMode, onToggleTravelerMode }: HeaderProps) => {
             </div>
             <div>
               <h1 className="text-base lg:text-xl font-black text-foreground tracking-tight">
-                <span className={isTravelerMode ? 'text-red-400' : 'text-primary'}>Grid</span>
+                <span className={isTravelerMode ? 'text-red-400' : 'text-primary'}>Gridfy</span>
               </h1>
               <p className="text-primary/70 text-[8px] lg:text-[9px] font-tactical tracking-wider uppercase hidden sm:block">
-                {isTravelerMode ? 'EMERGENCY MODE' : 'URBAN INTELLIGENCE'}
+                {isTravelerMode ? 'EMERGENCY MODE' : 'CAPE TOWN URBAN INTELLIGENCE'}
               </p>
             </div>
           </div>
