@@ -36,6 +36,7 @@ import MunicipalScorecardView from './views/MunicipalScorecardView';
 import TourismHubView from './views/TourismHubView';
 import ResilienceView from './views/ResilienceView';
 import ApiHubView from './views/ApiHubView';
+import SACrimeLayerView from './views/SACrimeLayerView';
 import { RegionProvider } from '@/contexts/RegionContext';
 import RegionSwitcher from './RegionSwitcher';
 import CityChatbotWidget from './CityChatbotWidget';
@@ -72,6 +73,7 @@ export type ViewId =
   | 'tourism-hub'
   | 'resilience'
   | 'api-hub'
+  | 'sa-crime-layer'
   | 'settings';
 
 const GridifyDashboard = memo(() => {
@@ -123,6 +125,7 @@ const GridifyDashboard = memo(() => {
       case 'tourism-hub': return <TourismHubView />;
       case 'resilience': return <ResilienceView />;
       case 'api-hub': return <ApiHubView />;
+      case 'sa-crime-layer': return <SACrimeLayerView />;
       case 'settings': return <SettingsView {...props} />;
       default: return <DashboardView {...props} />;
     }

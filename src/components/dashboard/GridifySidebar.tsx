@@ -76,6 +76,12 @@ const menuGroups: { label: string; items: { id: ViewId; label: string; icon: typ
     ],
   },
   {
+    label: 'SA Crime Layer',
+    items: [
+      { id: 'sa-crime-layer', label: 'Crime & Loadshedding', icon: ShieldAlert },
+    ],
+  },
+  {
     label: 'National Expansion',
     items: [
       { id: 'resilience', label: 'Resilience', icon: ShieldAlert },
