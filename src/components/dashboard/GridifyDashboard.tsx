@@ -38,6 +38,7 @@ import ResilienceView from './views/ResilienceView';
 import ApiHubView from './views/ApiHubView';
 import SACrimeLayerView from './views/SACrimeLayerView';
 import { RegionProvider } from '@/contexts/RegionContext';
+import { SAPSCrimeProvider } from '@/contexts/SAPSCrimeContext';
 import RegionSwitcher from './RegionSwitcher';
 import CityChatbotWidget from './CityChatbotWidget';
 
@@ -133,6 +134,7 @@ const GridifyDashboard = memo(() => {
 
   return (
     <RegionProvider>
+    <SAPSCrimeProvider>
       <div className="h-screen flex overflow-hidden bg-background">
         {/* Mobile overlay */}
         {isMobile && sidebarOpen && (
@@ -186,6 +188,7 @@ const GridifyDashboard = memo(() => {
           trigger={upgradeModal.trigger}
         />
       </div>
+    </SAPSCrimeProvider>
     </RegionProvider>
   );
 });
