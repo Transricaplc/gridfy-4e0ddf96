@@ -13,6 +13,12 @@ import {
 } from 'recharts';
 import { useSAPSCrime } from '@/contexts/SAPSCrimeContext';
 import SafeEducationRetailDirectory from '@/components/dashboard/SafeEducationRetailDirectory';
+import CitizenReportingCard from '@/components/dashboard/cards/CitizenReportingCard';
+import LiveAlertsCard from '@/components/dashboard/cards/LiveAlertsCard';
+import HeatmapCard from '@/components/dashboard/cards/HeatmapCard';
+import GBVTrackerCard from '@/components/dashboard/cards/GBVTrackerCard';
+import SOSPanelCard from '@/components/dashboard/cards/SOSPanelCard';
+import ResponseLeaderboardCard from '@/components/dashboard/cards/ResponseLeaderboardCard';
 
 /* ── Static chart data (non-SAPS) ──────────────────────── */
 
