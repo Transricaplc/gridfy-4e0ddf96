@@ -13,6 +13,12 @@ import {
 } from 'recharts';
 import { useSAPSCrime } from '@/contexts/SAPSCrimeContext';
 import SafeEducationRetailDirectory from '@/components/dashboard/SafeEducationRetailDirectory';
+import CitizenReportingCard from '@/components/dashboard/cards/CitizenReportingCard';
+import LiveAlertsCard from '@/components/dashboard/cards/LiveAlertsCard';
+import HeatmapCard from '@/components/dashboard/cards/HeatmapCard';
+import GBVTrackerCard from '@/components/dashboard/cards/GBVTrackerCard';
+import SOSPanelCard from '@/components/dashboard/cards/SOSPanelCard';
+import ResponseLeaderboardCard from '@/components/dashboard/cards/ResponseLeaderboardCard';
 
 /* ── Static chart data (non-SAPS) ──────────────────────── */
 
@@ -392,6 +398,24 @@ const SACrimeLayerView = memo(() => {
       {/* Row 3: Safe Education & Retail Directory (2col) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <SafeEducationRetailDirectory />
+      </div>
+
+      {/* Row 3b: Citizen Reporting (2col) + Live Alerts (1col) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <CitizenReportingCard />
+        <LiveAlertsCard />
+      </div>
+
+      {/* Row 3c: Heatmap (2col) + GBV Tracker (1col) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <HeatmapCard />
+        <GBVTrackerCard />
+      </div>
+
+      {/* Row 3d: SOS Panel (1col) + Response Leaderboard (1col) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <SOSPanelCard />
+        <ResponseLeaderboardCard />
       </div>
 
       {/* Row 4: Route Risk Predictor (full width) */}
