@@ -1,7 +1,8 @@
 import { memo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { User, Shield, Bell, CreditCard, HelpCircle, Info, Crown, Lock, MessageSquare } from 'lucide-react';
+import { User, Shield, Bell, CreditCard, HelpCircle, Info, Crown, Lock, MessageSquare, EyeOff } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import type { ViewId } from '../GridifyDashboard';
 
 interface Props {
