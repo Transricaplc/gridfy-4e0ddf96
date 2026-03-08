@@ -1,8 +1,9 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { 
   User, Shield, Bell, CreditCard, HelpCircle, Info, Crown, Lock, MessageSquare, EyeOff,
-  Download, WifiOff, Zap, FileText, Phone, CheckCircle2, RefreshCw, Smartphone, Database
+  Download, WifiOff, Zap, FileText, Phone, CheckCircle2, RefreshCw, Smartphone, Database,
+  Contrast
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
