@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import {
   ThumbsUp, MessageCircle, MapPin, Crown, Lock, Info, Shield, Eye, CheckCircle2,
   Award, Star, Upload, MessageSquare, Zap, Trophy, TrendingUp, Sun, AlertTriangle,
-  Phone, Users, ChevronDown, ChevronUp, ExternalLink, Clock, Radio
+  Phone, Users, ChevronDown, ChevronUp, ExternalLink, Clock, Radio, Bell
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
