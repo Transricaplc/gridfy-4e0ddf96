@@ -90,6 +90,7 @@ export type ViewId =
   | 'darkness-windows'
   | 'vehicle-crime'
   | 'school-safety'
+  | 'business-safety'
   | 'settings';
 
 const GridifyDashboard = memo(() => {
