@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Shield, AlertTriangle, Navigation, Heart, MapPin, Clock,
@@ -7,6 +7,7 @@ import {
 import type { ViewId } from '../GridifyDashboard';
 import TimeRiskStrip from '../widgets/TimeRiskStrip';
 import AreaIntelCard from '../widgets/AreaIntelCard';
+import { getTimeWindows } from '@/data/timeAnalyticsData';
 
 interface DashboardViewProps {
   onUpgrade: (trigger?: string) => void;
@@ -29,14 +30,7 @@ const incidents = [
   { id: '3', type: 'Suspicious Activity', icon: '🟡', time: '52 min ago', location: 'High Level Rd', distance: '0.8 km', verified: false },
 ];
 
-const riskWindows = [
-  { time: '17:00–18:30', risk: 'high', loadshedding: false },
-  { time: '18:30–20:00', risk: 'critical', loadshedding: true },
-  { time: '20:00–21:30', risk: 'high', loadshedding: true },
-  { time: '21:30–23:00', risk: 'elevated', loadshedding: false },
-  { time: '23:00–00:30', risk: 'elevated', loadshedding: false },
-];
-
+// Risk colors for rendering
 const riskColors: Record<string, string> = {
   low: 'bg-safety-green',
   elevated: 'bg-safety-yellow',
@@ -59,6 +53,7 @@ const emergencyContacts = [
 const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [briefingExpanded, setBriefingExpanded] = useState(false);
+  const riskWindows = useMemo(() => getTimeWindows(), []);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -214,9 +209,9 @@ const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
       <div>
         <h2 className="text-sm font-bold text-foreground mb-3">Tonight's Risk Windows</h2>
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-visible">
-          {riskWindows.map((w, i) => (
-            <div key={i} className={cn(
-              "p-3 rounded-xl border bg-card shrink-0 w-[140px]",
+          {riskWindows.map(w => (
+            <div key={w.id} className={cn(
+              "p-3 rounded-xl border bg-card shrink-0 w-[150px]",
               w.loadshedding ? "border-safety-orange/30" : "border-border"
             )}>
               <p className="text-xs font-bold text-foreground tabular-nums">{w.time}</p>
@@ -225,6 +220,7 @@ const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
                 {w.loadshedding && <Zap className="w-3.5 h-3.5 text-safety-yellow shrink-0" />}
               </div>
               <p className="text-[10px] text-muted-foreground mt-1.5 capitalize">{w.risk} risk</p>
+              <p className="text-[10px] text-foreground font-medium mt-0.5">{w.dominantCrime}</p>
               {w.loadshedding && (
                 <p className="text-[10px] text-safety-yellow font-medium">Load-shedding</p>
               )}
