@@ -83,6 +83,7 @@ export type ViewId =
   | 'safety-network'
   | 'safe-route'
   | 'safe-space'
+  | 'darkness-windows'
   | 'settings';
 
 const GridifyDashboard = memo(() => {
