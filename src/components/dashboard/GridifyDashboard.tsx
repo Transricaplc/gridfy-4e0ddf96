@@ -41,6 +41,7 @@ import SafetyNetworkView from './views/SafetyNetworkView';
 import SafeRouteView from './views/SafeRouteView';
 import SafeSpaceView from './views/SafeSpaceView';
 import DarknessWindowView from './views/DarknessWindowView';
+import VehicleCrimeView from './views/VehicleCrimeView';
 import { RegionProvider } from '@/contexts/RegionContext';
 import { SAPSCrimeProvider } from '@/contexts/SAPSCrimeContext';
 import RegionSwitcher from './RegionSwitcher';
