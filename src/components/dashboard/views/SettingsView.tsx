@@ -34,6 +34,15 @@ const SettingsView = memo(({ onUpgrade }: Props) => {
   const [dailyBriefing, setDailyBriefing] = useState(true);
   const [downloadedPacks, setDownloadedPacks] = useState<Set<string>>(new Set(['rondebosch', 'claremont']));
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [highContrast, setHighContrast] = useState(() => document.documentElement.classList.contains('high-contrast'));
+
+  useEffect(() => {
+    if (highContrast) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+    }
+  }, [highContrast]);
 
   const handleDownloadPack = (id: string) => {
     if (downloadedPacks.size >= 4 && !downloadedPacks.has(id)) return; // max 4 packs (home + 3)
