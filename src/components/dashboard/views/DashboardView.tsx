@@ -5,6 +5,8 @@ import {
   Phone, ChevronDown, ChevronUp, Zap, ExternalLink, CheckCircle2, Map
 } from 'lucide-react';
 import type { ViewId } from '../GridifyDashboard';
+import TimeRiskStrip from '../widgets/TimeRiskStrip';
+import AreaIntelCard from '../widgets/AreaIntelCard';
 
 interface DashboardViewProps {
   onUpgrade: (trigger?: string) => void;

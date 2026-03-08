@@ -3,6 +3,8 @@ import { cn } from '@/lib/utils';
 import { Search, MapPin, Layers, Locate, Plus, Minus, Map } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import type { ViewId } from '../GridifyDashboard';
+import TimeRiskStrip from '../widgets/TimeRiskStrip';
+import AreaIntelCard from '../widgets/AreaIntelCard';
 
 interface Props {
   onUpgrade: (trigger?: string) => void;
