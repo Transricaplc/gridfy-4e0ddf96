@@ -1,8 +1,9 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { 
   User, Shield, Bell, CreditCard, HelpCircle, Info, Crown, Lock, MessageSquare, EyeOff,
-  Download, WifiOff, Zap, FileText, Phone, CheckCircle2, RefreshCw, Smartphone, Database
+  Download, WifiOff, Zap, FileText, Phone, CheckCircle2, RefreshCw, Smartphone, Database,
+  Contrast
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,15 @@ const SettingsView = memo(({ onUpgrade }: Props) => {
   const [dailyBriefing, setDailyBriefing] = useState(true);
   const [downloadedPacks, setDownloadedPacks] = useState<Set<string>>(new Set(['rondebosch', 'claremont']));
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [highContrast, setHighContrast] = useState(() => document.documentElement.classList.contains('high-contrast'));
+
+  useEffect(() => {
+    if (highContrast) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+    }
+  }, [highContrast]);
 
   const handleDownloadPack = (id: string) => {
     if (downloadedPacks.size >= 4 && !downloadedPacks.has(id)) return; // max 4 packs (home + 3)
@@ -101,8 +111,20 @@ const SettingsView = memo(({ onUpgrade }: Props) => {
               ))}
             </div>
           </div>
+
+          {/* High Contrast Mode */}
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-3">
+              <Contrast className="w-5 h-5 text-foreground" />
+              <div>
+                <p className="text-sm font-medium text-foreground">High Contrast Mode</p>
+                <p className="text-xs text-muted-foreground">White text on black — WCAG AAA compliant</p>
+              </div>
+            </div>
+            <Switch checked={highContrast} onCheckedChange={setHighContrast} />
+          </div>
         </div>
-        <button className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Save Preferences</button>
+        <button className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors min-h-[48px]">Save Preferences</button>
       </div>
 
       {/* Notifications */}

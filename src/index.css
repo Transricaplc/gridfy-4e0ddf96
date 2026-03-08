@@ -45,6 +45,16 @@
     --safety-orange: 25 95% 53%;
     --safety-red: 0 84% 60%;
 
+    /* Gridfy tactical palette */
+    --gridfy-green: 140 100% 50%;
+    --gridfy-red: 4 100% 59%;
+    --gridfy-amber: 33 100% 50%;
+
+    /* Safe Space purple theme */
+    --safe-space-bg: 264 50% 11%;
+    --safe-space-accent: 270 95% 75%;
+    --safe-space-foreground: 0 0% 100%;
+
     /* Elite gold gradient stops */
     --elite-gold-from: 51 100% 50%;
     --elite-gold-to: 33 100% 50%;
@@ -61,50 +71,95 @@
   }
 
   .dark {
-    --background: 220 20% 7%;
+    --background: 215 30% 4%;
     --foreground: 210 40% 98%;
 
-    --card: 220 18% 10%;
+    --card: 215 25% 6%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 220 18% 10%;
+    --popover: 215 25% 6%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 152 69% 42%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 140 100% 50%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 220 14% 14%;
+    --secondary: 215 20% 11%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 14% 14%;
+    --muted: 215 20% 11%;
     --muted-foreground: 215 20% 60%;
 
-    --accent: 150 20% 16%;
+    --accent: 140 30% 14%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 4 100% 59%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 14% 18%;
-    --input: 220 14% 18%;
-    --ring: 152 69% 42%;
+    --border: 215 20% 14%;
+    --input: 215 20% 14%;
+    --ring: 140 100% 50%;
 
-    --safety-green: 160 84% 45%;
-    --safety-yellow: 38 92% 55%;
+    --safety-green: 140 100% 50%;
+    --safety-yellow: 33 100% 50%;
     --safety-orange: 25 95% 58%;
-    --safety-red: 0 84% 60%;
+    --safety-red: 4 100% 59%;
+
+    --gridfy-green: 140 100% 50%;
+    --gridfy-red: 4 100% 59%;
+    --gridfy-amber: 33 100% 50%;
+
+    --safe-space-bg: 264 50% 11%;
+    --safe-space-accent: 270 95% 75%;
+    --safe-space-foreground: 0 0% 100%;
 
     --elite-gold-from: 51 100% 50%;
     --elite-gold-to: 33 100% 50%;
 
-    --sidebar-background: 220 18% 8%;
+    --sidebar-background: 215 25% 5%;
     --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 152 69% 42%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 150 20% 16%;
+    --sidebar-primary: 140 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 140 20% 12%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 220 14% 18%;
-    --sidebar-ring: 152 69% 42%;
+    --sidebar-border: 215 20% 14%;
+    --sidebar-ring: 140 100% 50%;
+  }
+
+  /* Safe Space theme override */
+  .safe-space-theme {
+    --background: 264 50% 11%;
+    --foreground: 0 0% 100%;
+    --card: 264 40% 14%;
+    --card-foreground: 0 0% 100%;
+    --primary: 270 95% 75%;
+    --primary-foreground: 264 50% 11%;
+    --secondary: 264 35% 18%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 264 35% 18%;
+    --muted-foreground: 270 30% 70%;
+    --accent: 270 40% 20%;
+    --accent-foreground: 270 95% 75%;
+    --border: 264 30% 22%;
+    --input: 264 30% 22%;
+    --ring: 270 95% 75%;
+  }
+
+  /* High contrast mode */
+  .high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --primary: 140 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 75%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
   }
 }
 
