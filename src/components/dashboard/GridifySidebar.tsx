@@ -7,7 +7,7 @@ import {
   Phone, Briefcase, Users, Bell, Settings, Crown, Shield, User, X,
   TrafficCone, Lightbulb, Plane, Landmark, TrendingUp, Leaf, Accessibility, Moon,
   Wrench, Gauge, Activity, FileCheck, CloudRain, Factory, Zap, MessageCircle, HeartHandshake, Award,
-  ShieldAlert, Code, Heart, GraduationCap
+  ShieldAlert, Code, Heart, GraduationCap, Store
 } from 'lucide-react';
 import type { ViewId } from './GridifyDashboard';
 
