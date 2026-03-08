@@ -20,6 +20,7 @@ import HeatmapCard from '@/components/dashboard/cards/HeatmapCard';
 import GBVTrackerCard from '@/components/dashboard/cards/GBVTrackerCard';
 import SOSPanelCard from '@/components/dashboard/cards/SOSPanelCard';
 import ResponseLeaderboardCard from '@/components/dashboard/cards/ResponseLeaderboardCard';
+import ThreatGridCard from '@/components/dashboard/cards/ThreatGridCard';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -257,6 +258,9 @@ const SACrimeLayerView = memo(() => {
         {/* ── TODAY / NOW ── */}
         {activeTab === 'now' && (
           <div className="space-y-4">
+            {/* Real-Time Threat Grid */}
+            <ThreatGridCard />
+
             {/* Live Alerts + Heatmap */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
