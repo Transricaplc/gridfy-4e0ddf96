@@ -81,6 +81,7 @@ const menuGroups: { label: string; items: { id: ViewId; label: string; icon: typ
     label: 'SA Crime Layer',
     items: [
       { id: 'sa-crime-layer', label: 'Crime & Loadshedding', icon: ShieldAlert },
+      { id: 'safe-space', label: 'Safe Space (GBV)', icon: Heart },
     ],
   },
   {
