@@ -10,6 +10,7 @@ interface Props {
 }
 
 const SettingsView = memo(({ onUpgrade }: Props) => {
+  const [smsFallback, setSmsFallback] = useState(false);
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
