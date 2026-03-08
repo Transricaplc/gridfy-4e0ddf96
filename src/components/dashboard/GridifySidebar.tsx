@@ -7,7 +7,7 @@ import {
   Phone, Briefcase, Users, Bell, Settings, Crown, Shield, User, X,
   TrafficCone, Lightbulb, Plane, Landmark, TrendingUp, Leaf, Accessibility, Moon,
   Wrench, Gauge, Activity, FileCheck, CloudRain, Factory, Zap, MessageCircle, HeartHandshake, Award,
-  ShieldAlert, Code, Heart, GraduationCap
+  ShieldAlert, Code, Heart, GraduationCap, Store
 } from 'lucide-react';
 import type { ViewId } from './GridifyDashboard';
 
@@ -85,6 +85,7 @@ const menuGroups: { label: string; items: { id: ViewId; label: string; icon: typ
       { id: 'vehicle-crime', label: 'Vehicle Crime Intel', icon: Car },
       { id: 'school-safety', label: 'School & Child Safety', icon: GraduationCap },
       { id: 'safe-space', label: 'Safe Space (GBV)', icon: Heart },
+      { id: 'business-safety', label: 'Business & Trader Intel', icon: Store },
     ],
   },
   {

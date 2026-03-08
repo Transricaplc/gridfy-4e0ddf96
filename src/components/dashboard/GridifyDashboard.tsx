@@ -43,6 +43,7 @@ import SafeSpaceView from './views/SafeSpaceView';
 import DarknessWindowView from './views/DarknessWindowView';
 import VehicleCrimeView from './views/VehicleCrimeView';
 import SchoolSafetyView from './views/SchoolSafetyView';
+import BusinessSafetyView from './views/BusinessSafetyView';
 import { RegionProvider } from '@/contexts/RegionContext';
 import { SAPSCrimeProvider } from '@/contexts/SAPSCrimeContext';
 import RegionSwitcher from './RegionSwitcher';
@@ -89,6 +90,7 @@ export type ViewId =
   | 'darkness-windows'
   | 'vehicle-crime'
   | 'school-safety'
+  | 'business-safety'
   | 'settings';
 
 const GridifyDashboard = memo(() => {
@@ -147,6 +149,7 @@ const GridifyDashboard = memo(() => {
       case 'darkness-windows': return <DarknessWindowView {...props} />;
       case 'vehicle-crime': return <VehicleCrimeView {...props} />;
       case 'school-safety': return <SchoolSafetyView {...props} />;
+      case 'business-safety': return <BusinessSafetyView {...props} />;
       case 'settings': return <SettingsView {...props} />;
       default: return <DashboardView {...props} />;
     }
