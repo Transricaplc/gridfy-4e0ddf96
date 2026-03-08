@@ -143,6 +143,7 @@ const GridifyDashboard = memo(() => {
       case 'safe-route': return <SafeRouteView {...props} />;
       case 'safe-space': return <SafeSpaceView {...props} />;
       case 'darkness-windows': return <DarknessWindowView {...props} />;
+      case 'vehicle-crime': return <VehicleCrimeView {...props} />;
       case 'settings': return <SettingsView {...props} />;
       default: return <DashboardView {...props} />;
     }
