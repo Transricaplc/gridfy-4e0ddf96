@@ -10,8 +10,7 @@ import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
 import DashboardView from './views/DashboardView';
 import MapFullView from './views/MapFullView';
 import SafetyOverviewView from './views/SafetyOverviewView';
-import AreasView from './views/AreasView';
-import TimeAnalyticsView from './views/TimeAnalyticsView';
+// AreasView and TimeAnalyticsView dissolved into contextual widgets
 import ActivitiesView from './views/ActivitiesView';
 import RideShareView from './views/RideShareView';
 import TrailSafetyView from './views/TrailSafetyView';
