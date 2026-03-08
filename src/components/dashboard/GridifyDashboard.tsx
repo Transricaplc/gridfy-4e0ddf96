@@ -37,10 +37,13 @@ import TourismHubView from './views/TourismHubView';
 import ResilienceView from './views/ResilienceView';
 import ApiHubView from './views/ApiHubView';
 import SACrimeLayerView from './views/SACrimeLayerView';
+import SafetyNetworkView from './views/SafetyNetworkView';
 import { RegionProvider } from '@/contexts/RegionContext';
 import { SAPSCrimeProvider } from '@/contexts/SAPSCrimeContext';
 import RegionSwitcher from './RegionSwitcher';
 import CityChatbotWidget from './CityChatbotWidget';
+import PanicButton from './PanicButton';
+import WitnessReportButton from './WitnessReportButton';
 
 export type ViewId =
   | 'dashboard'
@@ -75,6 +78,7 @@ export type ViewId =
   | 'resilience'
   | 'api-hub'
   | 'sa-crime-layer'
+  | 'safety-network'
   | 'settings';
 
 const GridifyDashboard = memo(() => {
@@ -127,6 +131,7 @@ const GridifyDashboard = memo(() => {
       case 'resilience': return <ResilienceView />;
       case 'api-hub': return <ApiHubView />;
       case 'sa-crime-layer': return <SACrimeLayerView />;
+      case 'safety-network': return <SafetyNetworkView {...props} />;
       case 'settings': return <SettingsView {...props} />;
       default: return <DashboardView {...props} />;
     }
@@ -169,6 +174,10 @@ const GridifyDashboard = memo(() => {
 
         {/* City Chatbot */}
         <CityChatbotWidget />
+
+        {/* Panic Button & Witness Report */}
+        <PanicButton />
+        <WitnessReportButton />
 
         {/* Mobile hamburger */}
         {isMobile && !sidebarOpen && (
