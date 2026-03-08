@@ -53,6 +53,7 @@ const emergencyContacts = [
 const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [briefingExpanded, setBriefingExpanded] = useState(false);
+  const riskWindows = useMemo(() => getTimeWindows(), []);
 
   return (
     <div className="space-y-6 animate-fade-in">
