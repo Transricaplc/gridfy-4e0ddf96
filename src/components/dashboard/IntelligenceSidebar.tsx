@@ -16,6 +16,8 @@ import ExpandablePanel from './ExpandablePanel';
 import EnvironmentalCluster from './EnvironmentalCluster';
 import NeighborhoodExplorer from './NeighborhoodExplorer';
 import SafeRoutePlanner from './SafeRoutePlanner';
+import SurveillanceHealthGauge from './widgets/SurveillanceHealthGauge';
+import CompoundRiskAlert from './widgets/CompoundRiskAlert';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -304,6 +306,16 @@ const IntelligenceSidebar = ({ onSuburbSelect }: IntelligenceSidebarProps) => {
             );
           })}
         </div>
+      </div>
+
+      {/* Surveillance Health Gauge */}
+      <div className="flex-shrink-0">
+        <SurveillanceHealthGauge areaCode={selectedSuburb?.area_code} />
+      </div>
+
+      {/* Compound Risk Alerts (Guardian Engine) */}
+      <div className="flex-shrink-0">
+        <CompoundRiskAlert />
       </div>
 
       {/* Environmental Context Cluster */}
