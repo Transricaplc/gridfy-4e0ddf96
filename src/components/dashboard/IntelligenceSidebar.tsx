@@ -16,6 +16,8 @@ import ExpandablePanel from './ExpandablePanel';
 import EnvironmentalCluster from './EnvironmentalCluster';
 import NeighborhoodExplorer from './NeighborhoodExplorer';
 import SafeRoutePlanner from './SafeRoutePlanner';
+import SurveillanceHealthGauge from './widgets/SurveillanceHealthGauge';
+import CompoundRiskAlert from './widgets/CompoundRiskAlert';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
