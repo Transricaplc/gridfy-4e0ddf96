@@ -4,6 +4,8 @@ import {
   Shield, AlertTriangle, Navigation, Heart, MapPin, Clock,
   Phone, ChevronDown, ChevronUp, Zap, ExternalLink, CheckCircle2, Map
 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileHeroHeader from '../MobileHeroHeader';
 import type { ViewId } from '../GridifyDashboard';
 import TimeRiskStrip from '../widgets/TimeRiskStrip';
 import AreaIntelCard from '../widgets/AreaIntelCard';
