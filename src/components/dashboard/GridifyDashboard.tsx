@@ -52,6 +52,7 @@ import { RegionProvider } from '@/contexts/RegionContext';
 import { SAPSCrimeProvider } from '@/contexts/SAPSCrimeContext';
 import PanicButton from './PanicButton';
 import WitnessReportButton from './WitnessReportButton';
+import CommandPill from './CommandPill';
 
 export type ViewId =
   | 'dashboard'
