@@ -292,9 +292,21 @@
     50% { box-shadow: 0 0 0 12px hsl(var(--accent-threat) / 0); }
   }
 
-  /* Skeleton */
+  /* Skeleton shimmer — Linear speed */
   .skeleton {
-    @apply animate-pulse rounded-lg bg-muted;
+    @apply rounded-lg;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--surface-02)) 0%,
+      hsl(var(--border-subtle)) 50%,
+      hsl(var(--surface-02)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 
   /* Uppercase tracking for pill badges */

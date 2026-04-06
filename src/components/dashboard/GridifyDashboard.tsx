@@ -4,6 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import GridifySidebar from './GridifySidebar';
 import BottomNavBar from './BottomNavBar';
+import SOSActionDock from './SOSActionDock';
 import ThreatHeader from './ThreatHeader';
 import UpgradeModal from './UpgradeModal';
 import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
@@ -248,6 +249,9 @@ const GridifyDashboard = memo(() => {
         {/* Panic Button — always floats above bottom nav */}
         <PanicButton />
         <WitnessReportButton />
+
+        {/* Mobile SOS Dock — sits above bottom nav */}
+        {isMobile && <SOSActionDock />}
 
         {/* Mobile Command Pill — floating quick-action launcher */}
         {isMobile && <CommandPill onNavigate={navigate} />}
