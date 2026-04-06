@@ -2,10 +2,12 @@ import { memo, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Shield, AlertTriangle, Navigation, Heart, MapPin, Clock,
-  Phone, ChevronDown, ChevronUp, Zap, ExternalLink, CheckCircle2, Map
+  Phone, ChevronDown, ChevronUp, Zap, Map
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import MobileHeroHeader from '../MobileHeroHeader';
+import SafetyScoreRing from '../SafetyScoreRing';
+import MetricStrip from '../MetricStrip';
+import GuardianAlert from '../widgets/GuardianAlert';
 import type { ViewId } from '../GridifyDashboard';
 import TimeRiskStrip from '../widgets/TimeRiskStrip';
 import AreaIntelCard from '../widgets/AreaIntelCard';
@@ -17,8 +19,6 @@ interface DashboardViewProps {
 }
 
 // ── Mock data ──────────────────────────────────────────────
-const crimeFilters = ['All', 'Theft', 'Robbery', 'Assault', 'GBV', 'Drugs', 'Hijacking', 'Housebreaking'];
-
 const briefing = {
   suburb: 'Sea Point',
   line1: '3 vehicle break-ins reported overnight — highest in 7 days',
@@ -27,12 +27,11 @@ const briefing = {
 };
 
 const incidents = [
-  { id: '1', type: 'Theft', icon: '🔴', time: '14 min ago', location: 'Beach Rd, Sea Point', distance: '0.4 km', verified: true },
-  { id: '2', type: 'Robbery', icon: '🔴', time: '28 min ago', location: 'Main Rd, Green Point', distance: '1.2 km', verified: true },
-  { id: '3', type: 'Suspicious Activity', icon: '🟡', time: '52 min ago', location: 'High Level Rd', distance: '0.8 km', verified: false },
+  { id: '1', type: 'Theft', emoji: '🔴', time: '14 min ago', location: 'Beach Rd, Sea Point', distance: '0.4 km', verified: true },
+  { id: '2', type: 'Robbery', emoji: '🔴', time: '28 min ago', location: 'Main Rd, Green Point', distance: '1.2 km', verified: true },
+  { id: '3', type: 'Suspicious', emoji: '🟡', time: '52 min ago', location: 'High Level Rd', distance: '0.8 km', verified: false },
 ];
 
-// Risk colors for rendering
 const riskColors: Record<string, string> = {
   low: 'bg-safety-green',
   elevated: 'bg-safety-yellow',
@@ -40,20 +39,14 @@ const riskColors: Record<string, string> = {
   critical: 'bg-safety-red',
 };
 
-const communityReports = [
-  { user: '🛡️ @WatchdogCPT', text: 'Pickpocket active near Greenmarket Square', time: '1 hr ago', suburb: 'City Centre' },
-  { user: '⭐ @SafetyWatcher', text: 'Vehicle circling block on High Level Rd', time: '2 hrs ago', suburb: 'Sea Point' },
-];
-
 const emergencyContacts = [
-  { label: 'SAPS Emergency', number: '10111', icon: Phone },
-  { label: 'CT Law Enforcement', number: '021 480 7700', icon: Phone },
-  { label: 'Ambulance (WC)', number: '10177', icon: Phone },
-  { label: 'GBV Helpline', number: '0800 428 428', icon: Heart },
+  { label: 'SAPS', number: '10111', color: 'text-blue-400' },
+  { label: 'CT Law', number: '021 480 7700', color: 'text-blue-400' },
+  { label: 'Ambulance', number: '10177', color: 'text-destructive' },
+  { label: 'GBV Helpline', number: '0800 428 428', color: 'text-accent-gbv' },
 ];
 
 const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
-  const [activeFilter, setActiveFilter] = useState('All');
   const [briefingExpanded, setBriefingExpanded] = useState(false);
   const riskWindows = useMemo(() => getTimeWindows(), []);
   const isMobile = useIsMobile();
@@ -61,77 +54,37 @@ const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
   return (
     <div className="space-y-6 animate-fade-in">
 
-      {/* ═══ MOBILE HERO — Apple Health-style north star metric ═══ */}
-      {isMobile && (
-        <MobileHeroHeader score={7.8} changePercent={3} suburb={briefing.suburb} />
-      )}
+      {/* ═══ GUARDIAN RISK ENGINE ALERT ═══ */}
+      <GuardianAlert onNavigate={onNavigate} />
 
-      {/* ═══ PANEL 3 — LIVE THREAT MAP TILE ═══ */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="relative h-[45vh] min-h-[240px] bg-secondary/30 flex items-center justify-center">
-          {/* Simulated map */}
-          <div className="absolute inset-0 opacity-20" style={{
-            background: 'radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.3), transparent 60%)'
-          }} />
-          <div className="relative text-center z-10">
-            <Map className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Tap to view full map</p>
-          </div>
-          {/* LIVE badge */}
-          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/20 border border-primary/30">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Live</span>
-          </div>
-          {/* Expand button */}
-          <button
-            onClick={() => onNavigate('map-full')}
-            className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-card/90 backdrop-blur border border-border text-xs font-semibold text-foreground hover:bg-card transition-colors"
-          >
-            Expand Map
-          </button>
-        </div>
-
-        {/* Crime type filter pills */}
-        <div className="p-3 border-t border-border">
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-visible">
-            {crimeFilters.map(f => (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors shrink-0",
-                  activeFilter === f
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ PANEL 4 — TODAY'S SAFETY BRIEFING ═══ */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
+      {/* ═══ DAILY SAFETY BRIEFING CARD ═══ */}
+      <div className="rounded-xl overflow-hidden bg-[hsl(var(--surface-01))] border border-[hsl(var(--border-subtle))]">
         <div className="flex">
-          <div className="w-1 shrink-0 bg-safety-yellow" />
+          <div className="w-1 shrink-0 bg-accent-safe" />
           <div className="flex-1 p-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-bold text-foreground">
-                Today's Briefing — {briefing.suburb}
-              </h2>
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-[13px] font-medium text-foreground">Your Safety Briefing</span>
+              <span className="text-[11px] font-mono text-muted-foreground">
                 {new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}
               </span>
             </div>
-            <div className="space-y-1.5 text-sm text-muted-foreground">
-              <p>• {briefing.line1}</p>
-              <p>• <span className="text-safety-yellow font-medium">{briefing.line2}</span></p>
-              <p>• {briefing.line3}</p>
+            <h2 className="text-[28px] font-bold text-foreground leading-tight mb-3">{briefing.suburb}</h2>
+            <div className="space-y-1.5 text-[13px] text-muted-foreground">
+              <p className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
+                {briefing.line1}
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-safety-yellow shrink-0" />
+                <span className="text-safety-yellow font-medium">{briefing.line2}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground shrink-0" />
+                {briefing.line3}
+              </p>
             </div>
             {briefingExpanded && (
-              <div className="mt-3 pt-3 border-t border-border text-xs text-muted-foreground space-y-1 animate-fade-in">
+              <div className="mt-3 pt-3 border-t border-[hsl(var(--border-subtle))] text-xs text-muted-foreground space-y-1 animate-fade-in">
                 <p>🔹 SAPS patrol active on Beach Road until 22:00</p>
                 <p>🔹 Community night watch deployed from 19:00</p>
                 <p>🔹 3 CCTV cameras operational in immediate area</p>
@@ -148,7 +101,19 @@ const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
         </div>
       </div>
 
-      {/* ═══ PANEL 5 — ACTIVE ALERTS FEED ═══ */}
+      {/* ═══ SAFETY SCORE RING — Apple Health ═══ */}
+      {isMobile && (
+        <SafetyScoreRing
+          score={7.8}
+          suburb={briefing.suburb}
+          onTap={() => onNavigate('safety-overview')}
+        />
+      )}
+
+      {/* ═══ METRIC STRIP — Stripe data clarity ═══ */}
+      <MetricStrip />
+
+      {/* ═══ INCIDENT FEED — Linear speed ═══ */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -158,75 +123,76 @@ const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
             </span>
           </h2>
         </div>
-        <div className="space-y-2">
+        <div className="divide-y divide-[hsl(var(--border-subtle)/0.3)]">
           {incidents.map(inc => (
-            <div key={inc.id} className={cn(
-              "p-3 border border-border bg-card flex items-center gap-3 active:scale-[0.98] transition-all duration-150",
-              isMobile ? "rounded-3xl p-5" : "rounded-xl"
-            )}>
+            <div
+              key={inc.id}
+              className="flex items-center gap-3 py-3 active:bg-[hsl(var(--surface-02))] transition-colors duration-100 cursor-pointer"
+            >
+              {/* Icon cell */}
               <div className={cn(
-                "flex items-center justify-center shrink-0 bg-secondary",
-                isMobile ? "w-11 h-11 rounded-2xl" : "w-9 h-9 rounded-lg"
+                "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                inc.verified ? "bg-destructive/15" : "bg-safety-yellow/15"
               )}>
-                <AlertTriangle className={cn(
-                  isMobile ? "w-5 h-5" : "w-4 h-4",
-                  inc.verified ? "text-destructive" : "text-safety-yellow"
-                )} />
+                <span className="text-sm">{inc.emoji}</span>
               </div>
+              {/* Content */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className={cn("font-semibold text-foreground", isMobile ? "text-base" : "text-sm")}>{inc.type}</span>
-                  <span className={cn(
-                    "px-1.5 py-0.5 rounded text-[9px] font-bold uppercase",
-                    inc.verified
-                      ? "bg-primary/15 text-primary"
-                      : "bg-muted text-muted-foreground"
-                  )}>
-                    {inc.verified ? 'Verified' : 'Community'}
-                  </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[14px] font-bold text-foreground">{inc.type}</span>
+                  {inc.verified && (
+                    <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">VERIFIED</span>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground truncate">{inc.location}</p>
               </div>
+              {/* Right */}
               <div className="text-right shrink-0">
-                <p className="text-[10px] text-muted-foreground">{inc.time}</p>
-                <p className="text-[10px] text-muted-foreground tabular-nums font-mono">{inc.distance}</p>
+                <p className="text-[10px] font-mono text-muted-foreground">{inc.time}</p>
+                <p className="text-[10px] font-mono text-accent-safe">{inc.distance}</p>
               </div>
             </div>
           ))}
         </div>
-        <button className="w-full mt-2 py-2.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:bg-secondary transition-colors">
+        <button className="w-full mt-2 py-2.5 rounded-xl border border-[hsl(var(--border-subtle))] text-xs font-medium text-muted-foreground hover:bg-[hsl(var(--surface-02))] transition-colors min-h-[44px]">
           See All Incidents
         </button>
       </div>
 
-      {/* ═══ PANEL 6 — QUICK ACTION ROW ═══ */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* ═══ QUICK ACTION GRID — Uber flow ═══ */}
+      <div className="grid grid-cols-2 gap-2">
         {[
-          { label: 'Safe Route', icon: Navigation, view: 'safe-route' as ViewId, desc: 'Plan your journey' },
-          { label: 'Report Incident', icon: AlertTriangle, view: 'community' as ViewId, desc: 'Alert your area' },
-          { label: 'Share Journey', icon: MapPin, view: 'safe-route' as ViewId, desc: 'Live tracking' },
-          { label: 'Safe Space', icon: Heart, view: 'safe-space' as ViewId, desc: 'GBV support' },
+          { label: 'Safe Route', icon: Navigation, view: 'safe-route' as ViewId, accent: 'text-accent-safe border-accent-safe/20' },
+          { label: 'Report Incident', icon: AlertTriangle, view: 'community' as ViewId, accent: 'text-safety-yellow border-safety-yellow/20' },
+          { label: 'Share Journey', icon: MapPin, view: 'safe-route' as ViewId, accent: 'text-accent-safe border-accent-safe/20' },
+          { label: 'Safe Space', icon: Heart, view: 'safe-space' as ViewId, accent: 'text-accent-gbv border-accent-gbv/20' },
         ].map(action => (
           <button
             key={action.label}
             onClick={() => onNavigate(action.view)}
-            className="p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-all text-left min-h-[80px]"
+            className={cn(
+              "p-4 rounded-xl border bg-card text-left min-h-[88px] transition-all duration-100",
+              "active:scale-[0.97] active:border-opacity-100",
+              action.accent
+            )}
           >
-            <action.icon className="w-5 h-5 text-primary mb-2" />
+            <action.icon className={cn("w-5 h-5 mb-2", action.accent.split(' ')[0])} />
             <p className="text-sm font-semibold text-foreground">{action.label}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{action.desc}</p>
           </button>
         ))}
       </div>
 
-      {/* ═══ PANEL 7 — RISK PLANNER STRIP ═══ */}
+      {/* ═══ RISK WINDOWS STRIP — Apple Health ═══ */}
       <div>
-        <h2 className="text-sm font-bold text-foreground mb-3">Tonight's Risk Windows</h2>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-visible">
+        <div className="flex items-center gap-2 mb-3">
+          <Clock className="w-4 h-4 text-muted-foreground" />
+          <h2 className="text-sm font-bold text-foreground">Tonight's Risk Windows</h2>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-visible" style={{ WebkitOverflowScrolling: 'touch' }}>
           {riskWindows.map(w => (
             <div key={w.id} className={cn(
               "p-3 rounded-xl border bg-card shrink-0 w-[150px]",
-              w.loadshedding ? "border-safety-orange/30" : "border-border"
+              w.loadshedding ? "border-safety-yellow/30" : "border-[hsl(var(--border-subtle))]"
             )}>
               <p className="text-xs font-bold text-foreground tabular-nums">{w.time}</p>
               <div className="flex items-center gap-2 mt-2">
@@ -234,19 +200,16 @@ const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
                 {w.loadshedding && <Zap className="w-3.5 h-3.5 text-safety-yellow shrink-0" />}
               </div>
               <p className="text-[10px] text-muted-foreground mt-1.5 capitalize">{w.risk} risk</p>
-              <p className="text-[10px] text-foreground font-medium mt-0.5">{w.dominantCrime}</p>
-              {w.loadshedding && (
-                <p className="text-[10px] text-safety-yellow font-medium">Load-shedding</p>
-              )}
+              <p className="text-[11px] text-foreground font-medium mt-0.5">{w.dominantCrime}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ═══ PANEL 7b — TIME-OF-DAY RISK ANALYSIS ═══ */}
+      {/* ═══ TIME-OF-DAY RISK ANALYSIS ═══ */}
       <TimeRiskStrip variant="detail" />
 
-      {/* ═══ PANEL 7c — AREA INTELLIGENCE SEARCH ═══ */}
+      {/* ═══ AREA INTELLIGENCE ═══ */}
       <div>
         <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
           <MapPin className="w-4 h-4 text-primary" />
@@ -255,47 +218,21 @@ const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
         <AreaIntelCard variant="inline" />
       </div>
 
-      {/* ═══ PANEL 8 — COMMUNITY FEED PREVIEW ═══ */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-foreground">Your Neighbourhood</h2>
-          <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold">Connected</span>
-        </div>
-        <div className="space-y-2">
-          {communityReports.map((r, i) => (
-            <div key={i} className="p-3 rounded-xl border border-border bg-card">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                <span className="font-medium">{r.user}</span>
-                <span>·</span>
-                <span>{r.time}</span>
-              </div>
-              <p className="text-sm text-foreground">{r.text}</p>
-              <p className="text-[10px] text-muted-foreground mt-1">{r.suburb}</p>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={() => onNavigate('community')}
-          className="w-full mt-2 py-2.5 rounded-xl border border-border text-xs font-medium text-primary hover:bg-secondary transition-colors"
-        >
-          See All Community Reports
-        </button>
-      </div>
-
-      {/* ═══ PANEL 9 — EMERGENCY CONTACTS STRIP ═══ */}
+      {/* ═══ EMERGENCY CONTACTS STRIP ═══ */}
       <div>
         <h2 className="text-sm font-bold text-foreground mb-3">Emergency Contacts</h2>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-visible">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-visible" style={{ WebkitOverflowScrolling: 'touch' }}>
           {emergencyContacts.map(c => (
             <a
               key={c.label}
               href={`tel:${c.number.replace(/\s/g, '')}`}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-border bg-card hover:border-primary/30 transition-colors shrink-0 min-h-[48px]"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-[hsl(var(--border-subtle))] bg-card shrink-0 min-h-[48px] active:scale-[0.97] transition-transform"
+              aria-label={`Call ${c.label} at ${c.number}`}
             >
-              <c.icon className="w-4 h-4 text-primary shrink-0" />
+              <Phone className={cn("w-4 h-4 shrink-0", c.color)} />
               <div>
-                <p className="text-xs font-semibold text-foreground whitespace-nowrap">{c.label}</p>
-                <p className="text-[10px] text-muted-foreground tabular-nums">{c.number}</p>
+                <p className="text-[11px] text-muted-foreground whitespace-nowrap">{c.label}</p>
+                <p className="text-xs font-mono font-bold text-foreground">{c.number}</p>
               </div>
             </a>
           ))}

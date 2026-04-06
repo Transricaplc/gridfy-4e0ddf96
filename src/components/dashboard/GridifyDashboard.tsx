@@ -4,6 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import GridifySidebar from './GridifySidebar';
 import BottomNavBar from './BottomNavBar';
+import SOSActionDock from './SOSActionDock';
 import ThreatHeader from './ThreatHeader';
 import UpgradeModal from './UpgradeModal';
 import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
