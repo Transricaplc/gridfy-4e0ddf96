@@ -1,6 +1,6 @@
 import { memo, useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronDown, MapPin, Plus } from 'lucide-react';
+import { ChevronDown, MapPin, Plus, Menu } from 'lucide-react';
 
 type ThreatLevel = 'low' | 'elevated' | 'high' | 'critical';
 
