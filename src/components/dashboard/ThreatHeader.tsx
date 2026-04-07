@@ -62,6 +62,7 @@ const ThreatHeader = memo(({
   threatLevel = 'elevated',
   incidentCount = 7,
   onBrowseAllAreas,
+  onMenuOpen,
 }: ThreatHeaderProps) => {
   const config = levelConfig[threatLevel];
   const [dropdownOpen, setDropdownOpen] = useState(false);
