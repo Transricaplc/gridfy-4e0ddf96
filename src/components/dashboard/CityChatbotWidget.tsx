@@ -67,6 +67,9 @@ export default function CityChatbotWidget() {
     }, 800 + Math.random() * 700);
   };
 
+  // FIX 2: Hide FAB entirely on mobile
+  if (isMobile) return null;
+
   if (!isOpen) {
     return (
       <button

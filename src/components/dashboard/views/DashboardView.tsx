@@ -156,7 +156,7 @@ const DashboardView = memo(({ onNavigate }: DashboardViewProps) => {
             </button>
           ))}
         </div>
-        <button className="w-full mt-2 py-2.5 rounded-xl border border-[hsl(var(--border-subtle))] text-xs font-medium text-muted-foreground hover:bg-[hsl(var(--surface-02))] transition-colors min-h-[44px]">
+        <button className="w-full mt-2 py-3 rounded-xl border border-[hsl(var(--border-subtle))] text-xs font-medium text-muted-foreground hover:bg-[hsl(var(--surface-02))] transition-colors min-h-[48px]">
           See All Incidents
         </button>
       </div>
