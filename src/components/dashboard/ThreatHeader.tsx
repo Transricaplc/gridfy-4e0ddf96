@@ -16,6 +16,7 @@ interface ThreatHeaderProps {
   threatLevel?: ThreatLevel;
   incidentCount?: number;
   onBrowseAllAreas?: () => void;
+  onMenuOpen?: () => void;
 }
 
 const levelConfig: Record<ThreatLevel, { label: string; pillBg: string; pillText: string; headerBg: string; barColor: string; pulse?: boolean }> = {
