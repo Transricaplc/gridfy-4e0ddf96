@@ -82,9 +82,9 @@ function scoreColor(s: number) {
    SOS BUTTONS — prominent emergency dialler
    ═══════════════════════════════════════════ */
 const sosButtons = [
-  { label: 'SAPS', number: '10111', color: 'bg-blue-600', icon: Shield },
+  { label: 'SAPS', number: '10111', display: '10111', color: 'bg-blue-600', icon: Shield },
   { label: 'FIRE', number: '0214807700', display: '021 480 7700', color: 'bg-red-600', icon: Flame },
-  { label: 'AMBULANCE', number: '10177', color: 'bg-emerald-600', icon: Phone },
+  { label: 'AMBULANCE', number: '10177', display: '10177', color: 'bg-emerald-600', icon: Phone },
 ] as const;
 
 const MapSOSDock = memo(() => {
