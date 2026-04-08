@@ -233,5 +233,152 @@ export const areasData: AreaData[] = [
     hospitalNumber: '021 954 2760',
     incidents24h: 15,
     camerasCoverage: 38
+  },
+  // ── Johannesburg ──
+  {
+    id: 'jhb-cbd',
+    name: 'Johannesburg CBD',
+    safetyScore: 30,
+    riskLevel: 'critical',
+    policeStation: 'Johannesburg Central SAPS',
+    policeNumber: '011 375 5911',
+    nearestHospital: 'Charlotte Maxeke Hospital',
+    hospitalNumber: '011 488 4911',
+    incidents24h: 35,
+    camerasCoverage: 45
+  },
+  {
+    id: 'sandton',
+    name: 'Sandton',
+    safetyScore: 82,
+    riskLevel: 'low',
+    policeStation: 'Sandton SAPS',
+    policeNumber: '011 783 4357',
+    nearestHospital: 'Morningside Mediclinic',
+    hospitalNumber: '011 282 5000',
+    incidents24h: 4,
+    camerasCoverage: 88
+  },
+  {
+    id: 'soweto',
+    name: 'Soweto',
+    safetyScore: 35,
+    riskLevel: 'high',
+    policeStation: 'Orlando SAPS',
+    policeNumber: '011 983 1613',
+    nearestHospital: 'Chris Hani Baragwanath',
+    hospitalNumber: '011 933 8000',
+    incidents24h: 22,
+    camerasCoverage: 30
+  },
+  {
+    id: 'rosebank',
+    name: 'Rosebank',
+    safetyScore: 79,
+    riskLevel: 'moderate',
+    policeStation: 'Rosebank SAPS',
+    policeNumber: '011 442 7620',
+    nearestHospital: 'Rosebank Clinic',
+    hospitalNumber: '011 328 0500',
+    incidents24h: 5,
+    camerasCoverage: 82
+  },
+  {
+    id: 'alexandra',
+    name: 'Alexandra',
+    safetyScore: 20,
+    riskLevel: 'critical',
+    policeStation: 'Alexandra SAPS',
+    policeNumber: '011 440 8152',
+    nearestHospital: 'Tembisa Hospital',
+    hospitalNumber: '011 923 2000',
+    incidents24h: 30,
+    camerasCoverage: 22
+  },
+  // ── Durban ──
+  {
+    id: 'durban-cbd',
+    name: 'Durban CBD',
+    safetyScore: 40,
+    riskLevel: 'high',
+    policeStation: 'Durban Central SAPS',
+    policeNumber: '031 325 4300',
+    nearestHospital: 'Addington Hospital',
+    hospitalNumber: '031 327 2000',
+    incidents24h: 18,
+    camerasCoverage: 55
+  },
+  {
+    id: 'umhlanga',
+    name: 'Umhlanga',
+    safetyScore: 84,
+    riskLevel: 'low',
+    policeStation: 'Umhlanga Rocks SAPS',
+    policeNumber: '031 571 6500',
+    nearestHospital: 'Umhlanga Hospital',
+    hospitalNumber: '031 560 5500',
+    incidents24h: 3,
+    camerasCoverage: 86
+  },
+  {
+    id: 'umlazi',
+    name: 'Umlazi',
+    safetyScore: 28,
+    riskLevel: 'critical',
+    policeStation: 'Umlazi SAPS',
+    policeNumber: '031 909 2200',
+    nearestHospital: 'Prince Mshiyeni Hospital',
+    hospitalNumber: '031 907 8111',
+    incidents24h: 25,
+    camerasCoverage: 25
+  },
+  // ── Pretoria ──
+  {
+    id: 'pretoria-cbd',
+    name: 'Pretoria CBD',
+    safetyScore: 45,
+    riskLevel: 'high',
+    policeStation: 'Pretoria Central SAPS',
+    policeNumber: '012 353 4313',
+    nearestHospital: 'Steve Biko Academic Hospital',
+    hospitalNumber: '012 354 1000',
+    incidents24h: 14,
+    camerasCoverage: 60
+  },
+  {
+    id: 'centurion',
+    name: 'Centurion',
+    safetyScore: 78,
+    riskLevel: 'moderate',
+    policeStation: 'Lyttelton SAPS',
+    policeNumber: '012 664 8600',
+    nearestHospital: 'Unitas Hospital',
+    hospitalNumber: '012 677 8000',
+    incidents24h: 5,
+    camerasCoverage: 76
+  },
+  {
+    id: 'mamelodi',
+    name: 'Mamelodi',
+    safetyScore: 26,
+    riskLevel: 'critical',
+    policeStation: 'Mamelodi SAPS',
+    policeNumber: '012 845 8200',
+    nearestHospital: 'Mamelodi Hospital',
+    hospitalNumber: '012 841 8300',
+    incidents24h: 27,
+    camerasCoverage: 28
+  },
+  {
+    id: 'hatfield',
+    name: 'Hatfield',
+    safetyScore: 75,
+    riskLevel: 'moderate',
+    policeStation: 'Brooklyn SAPS',
+    policeNumber: '012 366 1700',
+    nearestHospital: 'Mediclinic Heart Hospital',
+    hospitalNumber: '012 440 0200',
+    incidents24h: 6,
+    camerasCoverage: 74
   }
 ];
