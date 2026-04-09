@@ -1,4 +1,5 @@
 // Lovable Cloud backend function: create alerts for high-severity wildfire events.
+// Requires authenticated admin or dispatcher role.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
@@ -24,22 +25,56 @@ Deno.serve(async (req) => {
   try {
     const url = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!url || !serviceKey) {
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!url || !serviceKey || !anonKey) {
       return new Response(JSON.stringify({ error: "Missing backend configuration" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const supabase = createClient(url, serviceKey, {
-      auth: { persistSession: false },
-    });
+    // --- Auth: validate JWT and check role ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const anonClient = createClient(url, anonKey, { auth: { persistSession: false } });
+    const { data: { user }, error: userError } = await anonClient.auth.getUser(token);
+
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check admin or dispatcher role
+    const adminClient = createClient(url, serviceKey, { auth: { persistSession: false } });
+    const { data: roles } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["admin", "dispatcher"]);
+
+    if (!roles?.length) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // --- Business logic (unchanged) ---
+    const supabase = adminClient;
 
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const threshold = (body?.severityThreshold ?? "high") as SeverityThreshold;
     const allowedSeverities = severitiesFromThreshold(threshold);
 
-    // Find candidate events
     const { data: events, error: eventsError } = await supabase
       .from("wildfire_events")
       .select("id, title, severity, status, detected_at, latitude, longitude")
@@ -57,7 +92,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Find existing alert links to dedupe
     const ids = events.map((e) => e.id);
     const { data: existing, error: existingError } = await supabase
       .from("wildfire_alerts")
@@ -110,8 +144,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
