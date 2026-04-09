@@ -38,7 +38,7 @@ const CommandPill = memo(({ onNavigate }: CommandPillProps) => {
         <button
           className={cn(
             'fixed bottom-24 left-1/2 -translate-x-1/2 z-[85]',
-            'flex items-center gap-2 px-5 py-2.5 rounded-full',
+            'flex items-center gap-2 px-5 py-2.5 rounded-full min-h-[44px]',
             'bg-card/90 backdrop-blur-xl border border-border-subtle',
             'text-sm font-semibold text-muted-foreground',
             'active:scale-[0.96] transition-all duration-150',
