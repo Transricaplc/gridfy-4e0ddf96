@@ -234,7 +234,7 @@ const GridifyDashboard = memo(() => {
           <ScrollArea className="flex-1">
             <div className={cn(
               "mx-auto w-full max-w-full",
-              isMobile ? "px-3 py-4 pb-[200px]" : "px-8 py-8 max-w-[720px]"
+              isMobile ? "px-4 py-4 pb-[200px] max-w-full" : "px-8 py-8 max-w-[720px]"
             )}>
               {renderView()}
             </div>
