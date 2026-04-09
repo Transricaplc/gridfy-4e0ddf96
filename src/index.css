@@ -355,6 +355,12 @@
     .card-hover:active {
       background-color: hsl(var(--surface-02));
     }
+
+    /* Prevent any child from overflowing on mobile */
+    .content-panel > * {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
   }
 }
 
