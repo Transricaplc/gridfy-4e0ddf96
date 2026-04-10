@@ -125,7 +125,7 @@ const AlmienSidebar = memo(({ activeView, onNavigate, onUpgrade, isOpen, onToggl
           </div>
           <div>
             <h1 className="text-lg font-extrabold tracking-tight text-foreground leading-none">Almien</h1>
-            <p className="text-[11px] text-muted-foreground font-medium leading-none mt-0.5">Cape Town Urban Intelligence</p>
+            <p className="text-[11px] text-muted-foreground font-medium leading-none mt-0.5">Always Near</p>
           </div>
         </div>
         {isMobile && (
