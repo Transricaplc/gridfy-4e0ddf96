@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { Thermometer, Bus, Trash2, TrendingUp, Calendar, AlertTriangle } from 'lucide-react';
+import { Thermometer, Bus, Trash2, TrendingUp, Calendar, AlertTriangle, Brain } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from 'recharts';
 import type { ViewId } from '../AlmienDashboard';
 
