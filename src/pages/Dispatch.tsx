@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { toUserMessage } from "@/lib/errorMessages";
 
 type CitizenReport = {
   id: string;
@@ -98,8 +99,8 @@ export default function DispatchPage() {
       if (error) throw error;
       toast({ title: "Incident created" });
       incidents.refetch();
-    } catch (e: any) {
-      toast({ title: "Create incident failed", description: e?.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Create incident failed", description: toUserMessage(e), variant: "destructive" });
     }
   };
 
@@ -113,8 +114,8 @@ export default function DispatchPage() {
       });
       if (error) throw error;
       toast({ title: "Unit assigned" });
-    } catch (e: any) {
-      toast({ title: "Assign failed", description: e?.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Assign failed", description: toUserMessage(e), variant: "destructive" });
     }
   };
 

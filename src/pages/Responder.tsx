@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { toUserMessage } from "@/lib/errorMessages";
 
 type UnitMembership = { unit_id: string };
 type Unit = { id: string; name: string; callsign: string | null; current_status: string };
@@ -103,8 +104,8 @@ export default function ResponderPage() {
       if (error) throw error;
       toast({ title: "Acknowledged" });
       assignments.refetch();
-    } catch (e: any) {
-      toast({ title: "Acknowledge failed", description: e?.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Acknowledge failed", description: toUserMessage(e), variant: "destructive" });
     }
   };
 
@@ -116,8 +117,8 @@ export default function ResponderPage() {
       if (error) throw error;
       toast({ title: "Status updated" });
       units.refetch();
-    } catch (e: any) {
-      toast({ title: "Status update failed", description: e?.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Status update failed", description: toUserMessage(e), variant: "destructive" });
     }
   };
 
