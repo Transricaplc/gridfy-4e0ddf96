@@ -1,13 +1,18 @@
-import { memo, useState, useMemo, useEffect, useRef } from 'react';
+import { memo, useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Clock, Phone, Zap, Navigation, Heart, MapPin, Shield,
-  ChevronRight, Timer, Users, Share2
+  ChevronRight, Timer, Users, Share2, X, Search
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import GuardianPriorityAlert from '../GuardianPriorityAlert';
+import SuburbSearchInput from '../SuburbSearchInput';
 import type { ViewId } from '../AlmienDashboard';
 import { getTimeWindows } from '@/data/timeAnalyticsData';
+import { useUserLocation } from '@/hooks/useUserLocation';
+import { useSafiBehaviourWatch, type SafiAlert } from '@/hooks/useSafiBehaviourWatch';
+import { openDirectionsTo } from '@/utils/locationUtils';
+import type { UnifiedSuburbResult } from '@/utils/suburbSearch';
 
 interface DashboardViewProps {
   onUpgrade: (trigger?: string) => void;
@@ -130,8 +135,63 @@ const DashboardView = memo(({ onNavigate, onOpenSafi }: DashboardViewProps) => {
   const now = new Date();
   const timeStr = now.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
 
+  // ── Personalisation: user location ──
+  const userLoc = useUserLocation();
+  const personalSuburb =
+    userLoc.nearestArea?.name ?? userLoc.nearestSuburb?.suburb_name ?? briefing.suburb;
+  const personalScore = userLoc.nearestArea?.safetyScore
+    ?? (userLoc.nearestSuburb?.safety_score ? userLoc.nearestSuburb.safety_score / 10 : briefing.score);
+
+  // ── Safi behaviour-aware notifications ──
+  const [safiAlerts, setSafiAlerts] = useState<SafiAlert[]>([]);
+  const handleSafiAlert = useCallback((alert: SafiAlert) => {
+    setSafiAlerts(prev => [alert, ...prev].slice(0, 3));
+  }, []);
+  useSafiBehaviourWatch({
+    currentSuburb: personalSuburb,
+    safetyScore: personalScore,
+    onAlert: handleSafiAlert,
+  });
+
+  // ── Other-areas explorer ──
+  const [exploringSuburb, setExploringSuburb] = useState<UnifiedSuburbResult | null>(null);
+
   return (
     <div className="space-y-5 animate-fade-in">
+
+      {/* ═══ SAFI BEHAVIOUR ALERTS ═══ */}
+      {safiAlerts.length > 0 && (
+        <div className="space-y-2 animate-fade-in">
+          {safiAlerts.slice(0, 1).map(alert => (
+            <div
+              key={alert.id}
+              className={cn(
+                'flex items-start gap-3 p-3 rounded-xl border',
+                alert.urgency === 'critical'
+                  ? 'bg-accent-threat/10 border-accent-threat/30'
+                  : alert.urgency === 'warning'
+                    ? 'bg-accent-warning/10 border-accent-warning/30'
+                    : 'bg-accent-safe/10 border-accent-safe/30'
+              )}
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground">{alert.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{alert.message}</p>
+                <p className="text-[10px] font-neural text-accent-safe mt-1">
+                  ✦ SAFI · {alert.timestamp.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+              <button
+                onClick={() => setSafiAlerts(prev => prev.filter(a => a.id !== alert.id))}
+                className="shrink-0 p-1.5 rounded-lg hover:bg-secondary"
+                aria-label="Dismiss alert"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ═══ PANEL F: GUARDIAN PRIORITY ALERT ═══ */}
       {showGuardian && <GuardianPriorityAlert onNavigate={onNavigate} />}
@@ -142,12 +202,17 @@ const DashboardView = memo(({ onNavigate, onOpenSafi }: DashboardViewProps) => {
         threatBorderColors[briefing.threatLevel]
       )}>
         <div className="flex items-center gap-4 p-4">
-          <NeuralSafetyRing score={briefing.score} threatLevel={briefing.threatLevel} />
+          <NeuralSafetyRing score={personalScore} threatLevel={briefing.threatLevel} />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-lg font-bold text-foreground">{briefing.suburb}</span>
-              <span className="font-neural text-[11px] text-muted-foreground">{timeStr}</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-lg font-bold text-foreground truncate">{personalSuburb}</span>
+              <span className="font-neural text-[11px] text-muted-foreground shrink-0">{timeStr}</span>
             </div>
+            <p className="text-[10px] text-muted-foreground mb-2">
+              {userLoc.permissionDenied
+                ? '📍 Default area (location off)'
+                : userLoc.coords ? '📍 Using your location' : '📍 Detecting location…'}
+            </p>
             <div className="space-y-1.5 text-[12px]">
               <p className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-threat shrink-0 mt-1.5" />

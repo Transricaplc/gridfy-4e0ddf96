@@ -67,7 +67,7 @@ export default function CityChatbotWidget() {
     }, 800 + Math.random() * 700);
   };
 
-  // FIX 2: Hide FAB entirely on mobile
+  // Mobile uses Safi AI panel instead — hide this widget on mobile
   if (isMobile) return null;
 
   if (!isOpen) {
