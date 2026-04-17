@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { toUserMessage } from "@/lib/errorMessages";
 
 const schema = z.object({
   email: z.string().email(),
@@ -63,8 +64,8 @@ export default function AuthPage() {
 
         toast({ title: "Admin role granted", description: "You can now manage roles and units." });
         nav("/dispatch");
-      } catch (e: any) {
-        toast({ title: "Bootstrap failed", description: e?.message ?? "Please try again.", variant: "destructive" });
+      } catch (e) {
+        toast({ title: "Bootstrap failed", description: toUserMessage(e), variant: "destructive" });
       }
     };
 
@@ -121,10 +122,10 @@ export default function AuthPage() {
         });
         setMode("signin");
       }
-    } catch (e: any) {
+    } catch (e) {
       toast({
         title: "Authentication error",
-        description: e?.message ?? "Please try again.",
+        description: toUserMessage(e),
         variant: "destructive",
       });
     }
