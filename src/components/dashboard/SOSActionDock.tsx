@@ -1,5 +1,5 @@
 import { useState, useEffect, memo } from 'react';
-import { Shield, Flame, Waves, Mountain, Building2, ChevronUp, ChevronDown, Lock, FileText } from 'lucide-react';
+import { Shield, Flame, Waves, Mountain, Building2, ChevronUp, ChevronDown, Lock, FileText, Phone, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -21,9 +21,11 @@ const sosButtons: SOSButton[] = [
 
 interface SOSActionDockProps {
   isTravelerMode?: boolean;
+  /** When true, render as a collapsible FAB suitable for overlaying the map */
+  mapMode?: boolean;
 }
 
-const SOSActionDock = memo(({ isTravelerMode = false }: SOSActionDockProps) => {
+const SOSActionDock = memo(({ isTravelerMode = false, mapMode = false }: SOSActionDockProps) => {
   const [expanded, setExpanded] = useState(isTravelerMode);
   const [showLegal, setShowLegal] = useState(false);
 
