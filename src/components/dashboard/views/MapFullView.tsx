@@ -480,6 +480,8 @@ DataSourcesFooter.displayName = 'DataSourcesFooter';
 const MapFullView = memo(({ onNavigate }: Props) => {
   const { selectEntity } = useDashboard();
   const { user } = useAuth();
+  const roadSafetyMode = useAlmienStore((s) => s.roadSafetyMode);
+  const toggleRoadSafetyMode = useAlmienStore((s) => s.toggleRoadSafetyMode);
   const isMobile = useIsMobile();
   const [activeFilter, setActiveFilter] = useState('all');
   const [showLegend, setShowLegend] = useState(false);
