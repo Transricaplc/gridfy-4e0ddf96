@@ -14,6 +14,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import type { ViewId } from '../AlmienDashboard';
+import SuburbSearchInput from '../SuburbSearchInput';
+import { useUserLocation } from '@/hooks/useUserLocation';
 
 interface Props {
   onUpgrade: (trigger?: string) => void;
@@ -137,12 +139,15 @@ const SafeRouteView = memo(({ onNavigate }: Props) => {
   const [deviationAlert, setDeviationAlert] = useState(false);
   const journeyInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Auto-fill origin with "Current Location"
+  // Auto-fill origin with the user's nearest suburb
+  const userLoc = useUserLocation();
   useEffect(() => {
-    if (navigator.geolocation) {
-      setOrigin('📍 Current Location');
+    if (userLoc.nearestSuburb && !origin) {
+      setOrigin(userLoc.nearestSuburb.suburb_name);
+    } else if (userLoc.nearestArea && !origin) {
+      setOrigin(userLoc.nearestArea.name);
     }
-  }, []);
+  }, [userLoc.nearestSuburb, userLoc.nearestArea, origin]);
 
   const filterLocations = (query: string) =>
     capeTownLocations.filter(l => l.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
