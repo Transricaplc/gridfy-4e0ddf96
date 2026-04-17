@@ -168,66 +168,36 @@ const AreaIntelCard = memo(({ variant = 'inline', initialQuery = '', className }
     );
   }
 
-  // Search state
+  // Search state — uses unified SuburbSearchInput
   return (
-    <div className={cn("space-y-2", className)}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-        <Input
-          placeholder="Search suburb or area code..."
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          className={cn("pl-9 h-9 text-sm", variant === 'popover' && "bg-card/90 backdrop-blur")}
-        />
-        {query && (
-          <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-            <X className="w-3.5 h-3.5 text-muted-foreground" />
-          </button>
-        )}
-      </div>
-
-      {/* DB suburb results */}
-      {matchedSuburbs.length > 0 && (
-        <div className="space-y-1">
-          {matchedSuburbs.map(s => {
-            const level = getSuburbSafetyLevel(s.safety_score);
-            return (
-              <button
-                key={s.id}
-                onClick={() => { setSelectedSuburb(s); setQuery(''); }}
-                className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors text-left"
-              >
-                <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{s.suburb_name}</p>
-                  <p className="text-[10px] text-muted-foreground">Ward {s.ward_id} · {s.incidents_24h} incidents / 24h</p>
-                </div>
-                <span className={cn("text-sm font-bold tabular-nums", levelColors[level])}>{s.safety_score}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Static area results */}
-      {matchedAreas.length > 0 && matchedSuburbs.length === 0 && (
-        <div className="space-y-1">
-          {matchedAreas.map(a => (
-            <button
-              key={a.id}
-              onClick={() => { setSelectedArea(a); setQuery(''); }}
-              className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors text-left"
-            >
-              <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{a.name}</p>
-                <p className="text-[10px] text-muted-foreground capitalize">{a.safetyLevel} · {a.incidentCount.last7Days} / 7d</p>
-              </div>
-              <SafetyScoreBadge score={a.safetyScore} size="sm" />
-            </button>
-          ))}
-        </div>
-      )}
+    <div className={cn('space-y-2', className)}>
+      <SuburbSearchInput
+        placeholder="Search suburb, ward, or area code..."
+        initialValue={initialQuery}
+        onSelect={r => {
+          if (r.suburbData) {
+            // Build a SuburbIntelligence-like object for downstream display
+            setSelectedSuburb({
+              id: r.suburbData.id,
+              suburb_name: r.suburbData.suburb_name,
+              area_code: r.suburbData.area_code,
+              ward_id: r.suburbData.ward_id,
+              safety_score: r.suburbData.safety_score,
+              cctv_coverage: r.suburbData.cctv_coverage,
+              incidents_24h: r.suburbData.incidents_24h,
+              saps_station: r.suburbData.saps_station,
+              saps_contact: r.suburbData.saps_contact,
+              fire_station: r.suburbData.fire_station,
+              fire_contact: r.suburbData.fire_contact,
+              hospital_name: r.suburbData.hospital_name,
+              hospital_contact: r.suburbData.hospital_contact,
+              risk_type: r.suburbData.risk_type ?? null,
+            });
+          } else if (r.areaData) {
+            setSelectedArea(r.areaData);
+          }
+        }}
+      />
     </div>
   );
 });
