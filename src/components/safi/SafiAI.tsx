@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { X, Send, Mic, MicOff, Phone, MapPin, Users, Shield, ChevronRight, Share2 } from 'lucide-react';
+import { X, Send, Mic, MicOff, Phone, MapPin, Users, Shield, ChevronRight, Share2, Volume2, VolumeX, Ear } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAlmienStore } from '@/stores/almienStore';
 import type { ViewId } from '../dashboard/AlmienDashboard';
 
 interface SafiAIProps {
