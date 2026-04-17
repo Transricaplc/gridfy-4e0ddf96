@@ -202,12 +202,17 @@ const DashboardView = memo(({ onNavigate, onOpenSafi }: DashboardViewProps) => {
         threatBorderColors[briefing.threatLevel]
       )}>
         <div className="flex items-center gap-4 p-4">
-          <NeuralSafetyRing score={briefing.score} threatLevel={briefing.threatLevel} />
+          <NeuralSafetyRing score={personalScore} threatLevel={briefing.threatLevel} />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-lg font-bold text-foreground">{briefing.suburb}</span>
-              <span className="font-neural text-[11px] text-muted-foreground">{timeStr}</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-lg font-bold text-foreground truncate">{personalSuburb}</span>
+              <span className="font-neural text-[11px] text-muted-foreground shrink-0">{timeStr}</span>
             </div>
+            <p className="text-[10px] text-muted-foreground mb-2">
+              {userLoc.permissionDenied
+                ? '📍 Default area (location off)'
+                : userLoc.coords ? '📍 Using your location' : '📍 Detecting location…'}
+            </p>
             <div className="space-y-1.5 text-[12px]">
               <p className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-threat shrink-0 mt-1.5" />
