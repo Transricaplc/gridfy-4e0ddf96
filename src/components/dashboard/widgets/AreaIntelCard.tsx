@@ -73,17 +73,43 @@ const AreaIntelCard = memo(({ variant = 'inline', initialQuery = '', className }
           </div>
         )}
 
+        {/* SAPS + Hospital with Navigate buttons */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 text-[11px] text-foreground">
+            <Shield className="w-3 h-3 text-blue-400 shrink-0" />
+            <span className="truncate">{selectedSuburb.saps_station}</span>
+            <button
+              onClick={() => openDirectionsTo(selectedSuburb.saps_station)}
+              className="ml-auto inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-accent-safe/10 hover:bg-accent-safe/20 text-accent-safe border border-accent-safe/20 text-[9px] font-bold transition-colors"
+              title={`Navigate to ${selectedSuburb.saps_station}`}
+            >
+              <Navigation className="w-2.5 h-2.5" />NAVIGATE
+            </button>
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px] text-foreground">
+            <Building2 className="w-3 h-3 text-emerald-400 shrink-0" />
+            <span className="truncate">{selectedSuburb.hospital_name}</span>
+            <button
+              onClick={() => openDirectionsTo(selectedSuburb.hospital_name)}
+              className="ml-auto inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold transition-colors"
+              title={`Navigate to ${selectedSuburb.hospital_name}`}
+            >
+              <Navigation className="w-2.5 h-2.5" />NAVIGATE
+            </button>
+          </div>
+        </div>
+
         <div className="flex gap-2">
           <a href={`tel:${selectedSuburb.saps_contact.replace(/[^0-9+]/g, '')}`}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-opacity">
-            <Shield className="w-3.5 h-3.5" /> SAPS
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-opacity min-h-[44px]">
+            <Phone className="w-3.5 h-3.5" /> SAPS
           </a>
           <a href={`tel:${selectedSuburb.hospital_contact.replace(/[^0-9+]/g, '')}`}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold hover:opacity-90 transition-opacity">
-            <Building2 className="w-3.5 h-3.5" /> Medical
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold hover:opacity-90 transition-opacity min-h-[44px]">
+            <Phone className="w-3.5 h-3.5" /> Medical
           </a>
           <a href={`tel:${selectedSuburb.fire_contact.replace(/[^0-9+]/g, '')}`}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-safety-orange text-white text-xs font-bold hover:opacity-90 transition-opacity">
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-safety-orange text-white text-xs font-bold hover:opacity-90 transition-opacity min-h-[44px]">
             <Flame className="w-3.5 h-3.5" /> Fire
           </a>
         </div>
