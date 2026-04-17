@@ -334,56 +334,24 @@ const SafeRouteView = memo(({ onNavigate }: Props) => {
 
       {/* Route planner form */}
       <div className="p-6 rounded-xl border border-border bg-card space-y-4">
-        {/* Origin */}
-        <div className="relative">
+        {/* Origin — unified suburb search */}
+        <div>
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Origin</label>
-          <div className="relative">
-            <Locate className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-            <Input
-              value={origin}
-              onChange={e => handleOriginChange(e.target.value)}
-              onFocus={() => origin.length > 1 && setShowOriginSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowOriginSuggestions(false), 200)}
-              placeholder="Current location or search..."
-              className="pl-10"
-            />
-          </div>
-          {showOriginSuggestions && originSuggestions.length > 0 && (
-            <div className="absolute z-20 mt-1 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden">
-              {originSuggestions.map(s => (
-                <button key={s} className="w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors text-foreground"
-                  onMouseDown={() => { setOrigin(s); setShowOriginSuggestions(false); }}>
-                  <MapPin className="w-3.5 h-3.5 inline mr-2 text-muted-foreground" />{s}
-                </button>
-              ))}
-            </div>
-          )}
+          <SuburbSearchInput
+            placeholder="Current location or search suburb..."
+            initialValue={origin}
+            onSelect={r => setOrigin(r.name)}
+          />
         </div>
 
-        {/* Destination */}
-        <div className="relative">
+        {/* Destination — unified suburb search */}
+        <div>
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Destination</label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              value={destination}
-              onChange={e => handleDestChange(e.target.value)}
-              onFocus={() => destination.length > 1 && setShowDestSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowDestSuggestions(false), 200)}
-              placeholder="Search destination..."
-              className="pl-10"
-            />
-          </div>
-          {showDestSuggestions && destSuggestions.length > 0 && (
-            <div className="absolute z-20 mt-1 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden">
-              {destSuggestions.map(s => (
-                <button key={s} className="w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors text-foreground"
-                  onMouseDown={() => { setDestination(s); setShowDestSuggestions(false); }}>
-                  <MapPin className="w-3.5 h-3.5 inline mr-2 text-muted-foreground" />{s}
-                </button>
-              ))}
-            </div>
-          )}
+          <SuburbSearchInput
+            placeholder="Search destination suburb, ward, or area..."
+            initialValue={destination}
+            onSelect={r => setDestination(r.name)}
+          />
         </div>
 
         {/* Travel mode */}
