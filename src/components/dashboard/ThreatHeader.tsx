@@ -1,7 +1,9 @@
 import { memo, useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronDown, MapPin, Plus, Menu, Locate } from 'lucide-react';
+import { ChevronDown, MapPin, Plus, Menu, Locate, Wifi, WifiOff, Activity } from 'lucide-react';
 import { useUserLocation } from '@/hooks/useUserLocation';
+
+type ConnectionStatus = 'live' | 'syncing' | 'offline';
 
 type ThreatLevel = 'low' | 'elevated' | 'high' | 'critical';
 
@@ -16,6 +18,7 @@ interface ThreatHeaderProps {
   suburb?: string;
   threatLevel?: ThreatLevel;
   incidentCount?: number;
+  connectionStatus?: ConnectionStatus;
   onBrowseAllAreas?: () => void;
   onMenuOpen?: () => void;
   onSafiEmergency?: () => void;
@@ -63,6 +66,7 @@ const ThreatHeader = memo(({
   suburb,
   threatLevel = 'elevated',
   incidentCount = 7,
+  connectionStatus = 'live',
   onBrowseAllAreas,
   onMenuOpen,
   onSafiEmergency,
@@ -74,7 +78,14 @@ const ThreatHeader = memo(({
   const config = levelConfig[threatLevel];
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [activeZone, setActiveZone] = useState<string>(detectedSuburb);
+  const [now, setNow] = useState(() => new Date());
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Live clock — desktop time pill only (1s tick)
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   // Sync activeZone with detected location once it resolves
   useEffect(() => {
@@ -209,7 +220,7 @@ const ThreatHeader = memo(({
         )}
       </div>
 
-      {/* Right side — Safi emergency pill + incident count */}
+      {/* Right side — Safi · connection · incidents · time */}
       <div className="flex items-center gap-2 shrink-0">
         {onSafiEmergency && (
           <button
@@ -221,9 +232,44 @@ const ThreatHeader = memo(({
             <span className="font-neural text-[10px] font-bold text-accent-safe">✦</span>
           </button>
         )}
-        <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-          <span className="font-bold text-foreground">{incidentCount}</span> incidents nearby
+
+        {/* Connection indicator — icon-only on mobile, label on sm+ */}
+        <div
+          className={cn(
+            "flex items-center gap-1 h-7 px-1.5 sm:px-2 rounded-full font-mono text-[9px] font-bold tracking-system",
+            connectionStatus === 'live' && "bg-accent-safe/12 text-accent-safe",
+            connectionStatus === 'syncing' && "bg-accent-warning/15 text-accent-warning",
+            connectionStatus === 'offline' && "bg-accent-threat/15 text-accent-threat"
+          )}
+          title={
+            connectionStatus === 'live' ? 'Realtime feed connected'
+            : connectionStatus === 'syncing' ? 'Syncing data…'
+            : 'Offline — using cached data'
+          }
+        >
+          {connectionStatus === 'live' && <Wifi className="w-3 h-3" />}
+          {connectionStatus === 'syncing' && <Activity className="w-3 h-3 animate-pulse" />}
+          {connectionStatus === 'offline' && <WifiOff className="w-3 h-3" />}
+          <span className="hidden sm:inline">
+            {connectionStatus === 'live' ? 'LIVE' : connectionStatus === 'syncing' ? 'SYNC' : 'OFFLINE'}
+          </span>
+        </div>
+
+        {/* Incident count — kept compact, hidden on tiny screens */}
+        <span className="hidden xs:inline text-xs text-muted-foreground tabular-nums shrink-0">
+          <span className="font-bold text-foreground">{incidentCount}</span>
+          <span className="hidden sm:inline"> incidents</span>
         </span>
+
+        {/* Time pill — desktop only */}
+        <div className="hidden md:flex items-center gap-1.5 h-7 pl-2 pr-2.5 rounded-full bg-surface-02 border border-border-subtle">
+          <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-system">
+            {now.toLocaleDateString('en-ZA', { weekday: 'short' })}
+          </span>
+          <span className="text-[11px] font-mono font-bold text-foreground tabular-nums">
+            {now.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
       </div>
     </div>
   );
