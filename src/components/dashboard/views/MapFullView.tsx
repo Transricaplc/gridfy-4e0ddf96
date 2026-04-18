@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { Search, MapPin, Layers, Locate, Plus, Minus, Map, Clock, X, Shield, Flame, Phone, AlertTriangle, Share2, FileWarning, Navigation, WifiOff, Info, LogIn, User, Route } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import SuburbSearchInput from '../SuburbSearchInput';
-import SOSActionDock from '../SOSActionDock';
 import type { ViewId } from '../AlmienDashboard';
 import ZoneBottomSheet, { type ZoneData } from '../widgets/ZoneBottomSheet';
 import { getHourlyRisk, getRiskAtSlot, getCurrentSlotIndex, getMapInsightText } from '@/data/timeAnalyticsData';
@@ -730,18 +729,11 @@ const MapFullView = memo(({ onNavigate }: Props) => {
         </div>
       )}
 
-      {/* ═══ SOS DOCK — collapsible FAB on map ═══ */}
-      <SOSActionDock mapMode />
-
-      {/* Tap-to-report shortcut (small, tucked above SOS) */}
-      <button
-        onClick={() => onNavigate('community')}
-        className="fixed z-[87] right-4 w-10 h-10 rounded-full bg-[hsl(var(--surface-01))]/90 backdrop-blur border border-border-subtle flex items-center justify-center"
-        style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px) + 84px)' }}
-        aria-label="Report incident"
-      >
-        <FileWarning className="w-4 h-4 text-accent-warning" />
-      </button>
+      {/* v5.1 — Map overlay cleanup:
+          SOS is handled by the global <PanicButton /> (bottom-left)
+          and incident reporting by <WitnessReportButton /> (bottom-right).
+          Both render in AlmienDashboard.tsx and overlay every view consistently,
+          so we no longer duplicate them inside the map panel. */}
 
       {/* Legend pill */}
       <button
