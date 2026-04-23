@@ -14,6 +14,33 @@ export default {
     },
     extend: {
       colors: {
+        // ── Obsidian Tactical palette ──
+        void: '#000000',
+        signal: {
+          DEFAULT: '#00FF85',
+          green: '#00FF85',
+          dim: '#00CC6A',
+          dark: '#003D1F',
+        },
+        threat: {
+          DEFAULT: '#FF3B30',
+          red: '#FF3B30',
+          amber: '#FF9500',
+          dim: '#FF6B30',
+        },
+        intel: {
+          DEFAULT: '#00B4D8',
+          cyan: '#00B4D8',
+          dim: '#0090AD',
+          dark: '#00243A',
+        },
+        text: {
+          primary: '#FFFFFF',
+          secondary: '#A0A0A0',
+          muted: '#555555',
+          inverse: '#000000',
+        },
+        // (note: shadcn token text-primary/text-muted below override these via HSL)
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -64,14 +91,24 @@ export default {
           orange: "hsl(var(--safety-orange))",
           red: "hsl(var(--accent-threat))",
         },
-        // Charcoal surface system
+        // Obsidian Tactical surface system (true-black hierarchy)
         surface: {
+          DEFAULT: '#0A0A0A',
+          0: '#000000',
+          1: '#0A0A0A',
+          2: '#111111',
+          3: '#1A1A1A',
+          4: '#242424',
+          border: '#2A2A2A',
           base: "hsl(var(--surface-base))",
           "01": "hsl(var(--surface-01))",
           "02": "hsl(var(--surface-02))",
           deep: "hsl(var(--surface-deep))",
         },
         elite: {
+          DEFAULT: '#FFD60A',
+          gold: '#FFD60A',
+          dim: '#B89B00',
           from: "hsl(var(--elite-gold-from))",
           to: "hsl(var(--elite-gold-to))",
         },
@@ -96,7 +133,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        sans: ['"DM Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       fontSize: {
