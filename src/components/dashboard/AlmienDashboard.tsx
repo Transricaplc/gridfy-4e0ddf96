@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, memo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AlmienSidebar from './AlmienSidebar';
-import BottomNavBar from './BottomNavBar';
+import TacticalNav, { type TacticalTab } from './TacticalNav';
+import CommandCenterHome from './CommandCenterHome';
 import SOSActionDock from './SOSActionDock';
 import ThreatHeader from './ThreatHeader';
 import TrialBanner from './TrialBanner';
@@ -107,9 +109,34 @@ export type ViewId =
   | 'profile'
   | 'settings';
 
-const AlmienDashboard = memo(() => {
+interface AlmienDashboardProps {
+  initialView?: ViewId;
+}
+
+// Map between URL routes and ViewIds for the 5 top-level destinations
+const TAB_TO_VIEW: Record<TacticalTab, ViewId> = {
+  home:    'dashboard',
+  map:     'map-full',
+  routes:  'safe-route',
+  network: 'community',
+  me:      'profile',
+};
+const VIEW_TO_TAB: Partial<Record<ViewId, TacticalTab>> = {
+  'dashboard':  'home',
+  'map-full':   'map',
+  'safe-route': 'routes',
+  'community':  'network',
+  'profile':    'me',
+};
+const TAB_TO_PATH: Record<TacticalTab, string> = {
+  home: '/dashboard', map: '/map', routes: '/routes', network: '/network', me: '/me',
+};
+
+const AlmienDashboard = memo(({ initialView = 'dashboard' }: AlmienDashboardProps) => {
   const isMobile = useIsMobile();
-  const [activeView, setActiveView] = useState<ViewId>('dashboard');
+  const location = useLocation();
+  const routerNavigate = useNavigate();
+  const [activeView, setActiveView] = useState<ViewId>(initialView);
   const [upgradeModal, setUpgradeModal] = useState<{ open: boolean; trigger?: string }>({ open: false });
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [showZoneDirectory, setShowZoneDirectory] = useState(false);
@@ -120,6 +147,12 @@ const AlmienDashboard = memo(() => {
   });
 
   const isSafeSpaceView = activeView === 'safe-space';
+
+  // Sync activeView when the URL changes (e.g. user hits back/forward).
+  useEffect(() => {
+    if (initialView && initialView !== activeView) setActiveView(initialView);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialView]);
 
   useEffect(() => {
     if (isMobile && sidebarOpen) {
@@ -140,8 +173,27 @@ const AlmienDashboard = memo(() => {
     } else {
       setActiveView(view);
     }
+    // Mirror to URL when this maps to a top-level tab
+    const tab = VIEW_TO_TAB[view];
+    if (tab && location.pathname !== TAB_TO_PATH[tab]) {
+      routerNavigate(TAB_TO_PATH[tab]);
+    }
     if (isMobile) setSidebarOpen(false);
-  }, [isMobile]);
+  }, [isMobile, location.pathname, routerNavigate]);
+
+  const handleTabNavigate = useCallback((tab: TacticalTab) => {
+    const view = TAB_TO_VIEW[tab];
+    setActiveView(view);
+    if (location.pathname !== TAB_TO_PATH[tab]) {
+      routerNavigate(TAB_TO_PATH[tab]);
+    }
+  }, [location.pathname, routerNavigate]);
+
+  const handleSos = useCallback(() => {
+    // SOS hold completed — surface emergency Safi mode
+    setSafiMode('emergency');
+    setSafiOpen(true);
+  }, []);
 
   const handleOnboardingComplete = useCallback(() => {
     localStorage.setItem('almien-onboarded', 'true');
@@ -156,7 +208,12 @@ const AlmienDashboard = memo(() => {
   const renderView = () => {
     const props = { onUpgrade: openUpgrade, onNavigate: navigate };
     switch (activeView) {
-      case 'dashboard': return <DashboardView {...props} onOpenSafi={openSafi} />;
+      case 'dashboard':
+        // Mobile gets the new Obsidian Tactical Command Center.
+        // Desktop keeps the bento DashboardView (used inside the right panel).
+        return isMobile
+          ? <CommandCenterHome onNavigate={navigate} onOpenSafi={openSafi} onUpgrade={openUpgrade} />
+          : <DashboardView {...props} onOpenSafi={openSafi} />;
       case 'map-full': return <MapFullView {...props} />;
       case 'safety-overview': return <SafetyOverviewView {...props} />;
       case 'activities': return <ActivitiesView {...props} />;
@@ -273,7 +330,7 @@ const AlmienDashboard = memo(() => {
             <ScrollArea className="flex-1">
               <div className={cn(
                 "mx-auto w-full max-w-full content-panel",
-                isMobile ? "px-4 py-4 pb-[200px] max-w-full" : "px-8 py-8 max-w-[720px]"
+                isMobile ? "max-w-full" : "px-8 py-8 max-w-[720px]"
               )}>
                 {renderView()}
               </div>
@@ -281,19 +338,23 @@ const AlmienDashboard = memo(() => {
           )}
         </main>
 
-        {/* Floating elements */}
-        <PanicButton />
-        <WitnessReportButton />
-
-        {/* SOS Dock — desktop only */}
+        {/* Floating elements — desktop only.
+            On mobile the TacticalNav owns the SOS action and witness
+            reporting lives inside the Map page header. */}
+        {!isMobile && <PanicButton />}
+        {!isMobile && <WitnessReportButton />}
         {!isMobile && <SOSActionDock />}
 
         {/* Safi AI Panel */}
         <SafiAI isOpen={safiOpen} onClose={() => setSafiOpen(false)} onNavigate={navigate} initialMode={safiMode} />
 
-        {/* Mobile bottom navigation */}
+        {/* Mobile bottom navigation — Obsidian Tactical 5-tab + fixed SOS */}
         {isMobile && (
-          <BottomNavBar activeView={activeView} onNavigate={navigate} onSafiOpen={() => openSafi('chat')} />
+          <TacticalNav
+            active={(VIEW_TO_TAB[activeView] ?? 'home') as TacticalTab}
+            onNavigate={handleTabNavigate}
+            onSos={handleSos}
+          />
         )}
 
         <UpgradeModal
