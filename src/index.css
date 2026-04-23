@@ -270,24 +270,11 @@
     scrollbar-color: #2A2A2A transparent;
   }
 
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border-subtle));
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.3);
-  }
-  .scrollbar-visible {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--border-subtle)) transparent;
+  /* Card hover (legacy compat) */
+  .card-hover { @apply transition-colors duration-150; }
+  .card-hover:hover {
+    background-color: hsl(var(--surface-02));
+    border-color: hsl(var(--border-active));
   }
 
   /* Animations */
