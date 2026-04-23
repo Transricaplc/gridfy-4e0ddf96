@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import {
   ChevronRight, Settings, Cpu, Bell, Shield, Users, Radio, Crown, Lock,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { ViewId } from '../AlmienDashboard';
 import { useCountUp } from '@/hooks/useCountUp';
 
@@ -27,7 +28,7 @@ interface MenuRow {
   id: string;
   label: string;
   sub?: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   color: string;
   view?: ViewId;
 }
