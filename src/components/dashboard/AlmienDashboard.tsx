@@ -252,7 +252,12 @@ const AlmienDashboard = memo(({ initialView = 'dashboard' }: AlmienDashboardProp
       case 'api-hub': return <ApiHubView />;
       case 'sa-crime-layer': return <SACrimeLayerView />;
       case 'safety-network': return <SafetyNetworkView {...props} />;
-      case 'safe-route': return <SafeRouteView {...props} />;
+      case 'safe-route':
+        // Mobile gets the new Corridor Intelligence (Obsidian Tactical).
+        // Desktop keeps the rich SafeRouteView with maps + travel modes.
+        return isMobile
+          ? <CorridorIntelView {...props} />
+          : <SafeRouteView {...props} />;
       case 'safe-space': return <SafeSpaceView {...props} />;
       case 'darkness-windows': return <DarknessWindowView {...props} />;
       case 'vehicle-crime': return <VehicleCrimeView {...props} />;
