@@ -243,25 +243,31 @@
   .text-safety-yellow { color: hsl(var(--accent-warning)); }
   .text-safety-red { color: hsl(var(--accent-threat)); }
 
-  /* Elite / Premium gradient — now Almien purple */
+  /* Elite is now solid gold — 'gradient' name kept for compat */
   .bg-elite-gradient {
-    background: linear-gradient(135deg, hsl(var(--almien-purple)), hsl(var(--almien-violet)));
+    background: hsl(var(--elite-gold-from));
+    color: #000;
   }
-
   .text-elite-gradient {
-    background: linear-gradient(135deg, hsl(var(--almien-purple)), hsl(var(--almien-violet)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: hsl(var(--elite-gold-from));
+    background: none;
+    -webkit-text-fill-color: hsl(var(--elite-gold-from));
   }
 
-  /* Card hover */
-  .card-hover {
-    @apply transition-all duration-200;
+  /* Tactical scrollbars (2px) */
+  ::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
   }
-  .card-hover:hover {
-    background-color: hsl(var(--surface-02));
-    border-color: hsl(var(--border-active));
+  ::-webkit-scrollbar-track { background: #000; }
+  ::-webkit-scrollbar-thumb {
+    background: #2A2A2A;
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--accent-safe)); }
+  .scrollbar-visible {
+    scrollbar-width: thin;
+    scrollbar-color: #2A2A2A transparent;
   }
 
   /* Scrollbar styling */
