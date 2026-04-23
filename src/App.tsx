@@ -25,7 +25,12 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Welcome />} />
-              <Route path="/dashboard" element={<Index />} />
+              <Route path="/dashboard" element={<Index initialView="dashboard" />} />
+              {/* Obsidian Tactical top-level destinations */}
+              <Route path="/map"     element={<Index initialView="map-full" />} />
+              <Route path="/routes"  element={<Index initialView="safe-route" />} />
+              <Route path="/network" element={<Index initialView="community" />} />
+              <Route path="/me"      element={<Index initialView="profile" />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route
                 path="/dispatch"
