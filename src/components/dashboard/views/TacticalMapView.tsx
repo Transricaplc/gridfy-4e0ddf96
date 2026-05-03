@@ -6,6 +6,7 @@ import { Drawer } from 'vaul';
 import { useNavigate } from 'react-router-dom';
 import { useWards, type Ward } from '@/hooks/useWards';
 import { useSafetyServices, type SafetyService, type ServiceType } from '@/hooks/useSafetyServices';
+import { BASE_TILE_URL, BASE_TILE_ATTRIBUTION, BASE_TILE_SUBDOMAINS, BASE_TILE_MAX_ZOOM } from '@/components/map/tileConfig';
 import 'leaflet/dist/leaflet.css';
 import type { ViewId } from '../AlmienDashboard';
 
