@@ -413,6 +413,10 @@ const InteractiveMap = ({ fullHeight = false }: InteractiveMapProps) => {
             maxZoom={BASE_TILE_MAX_ZOOM}
           />
 
+          {/* Floating tactical search overlay */}
+          <MapSearchOverlay />
+
+
            {/* Citizen Reports Layer */}
            <CitizenReportsLayer visible={!!showReports} />
 
