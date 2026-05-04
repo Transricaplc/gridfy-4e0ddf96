@@ -15,6 +15,10 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import MiniMap from '@/components/map/MiniMap';
+import LiveModeToggle from '@/components/map/LiveModeToggle';
+import MapFilterBar from '@/components/map/MapFilterBar';
 
 // Lazy-load non-critical panels
 const IntelligenceSidebar = lazy(() => import('./IntelligenceSidebar'));
