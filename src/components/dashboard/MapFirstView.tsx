@@ -24,6 +24,7 @@ import ZoomLevelIndicator from './ZoomLevelIndicator';
 import AreaInfoCard from './AreaInfoCard';
 import { BASE_TILE_URL, BASE_TILE_ATTRIBUTION, BASE_TILE_SUBDOMAINS, BASE_TILE_MAX_ZOOM } from '@/components/map/tileConfig';
 import MapSearchOverlay from '@/components/map/MapSearchOverlay';
+import MapInstanceRegistrar from '@/components/map/core/MapInstanceRegistrar';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers
@@ -333,6 +334,9 @@ const MapFirstView = ({ fullHeight = true, onMapInteraction }: MapFirstViewProps
             subdomains={BASE_TILE_SUBDOMAINS}
             maxZoom={BASE_TILE_MAX_ZOOM}
           />
+
+          {/* Phase A: register map with singleton + event bus */}
+          <MapInstanceRegistrar />
 
           {/* Floating tactical search overlay */}
           <MapSearchOverlay />
