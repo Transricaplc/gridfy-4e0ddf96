@@ -18,10 +18,16 @@ interface MapFiltersState {
   timeRange: TimeRange;
   severity: SeverityLevel;
   dataType: DataType;
+  /** Scrubber position in ms-from-now (negative = past). null = "live". */
+  timeOffsetMs: number | null;
+  /** Whether the time scrubber is auto-playing. */
+  playing: boolean;
   setQuery: (q: string) => void;
   setTimeRange: (t: TimeRange) => void;
   setSeverity: (s: SeverityLevel) => void;
   setDataType: (d: DataType) => void;
+  setTimeOffsetMs: (offset: number | null) => void;
+  setPlaying: (p: boolean) => void;
   reset: () => void;
 }
 
@@ -30,9 +36,21 @@ export const useMapFilters = create<MapFiltersState>((set) => ({
   timeRange: '24h',
   severity: 'all',
   dataType: 'all',
+  timeOffsetMs: null,
+  playing: false,
   setQuery: (query) => set({ query }),
-  setTimeRange: (timeRange) => set({ timeRange }),
+  setTimeRange: (timeRange) => set({ timeRange, timeOffsetMs: null }),
   setSeverity: (severity) => set({ severity }),
   setDataType: (dataType) => set({ dataType }),
-  reset: () => set({ query: '', timeRange: '24h', severity: 'all', dataType: 'all' }),
+  setTimeOffsetMs: (timeOffsetMs) => set({ timeOffsetMs }),
+  setPlaying: (playing) => set({ playing }),
+  reset: () =>
+    set({
+      query: '',
+      timeRange: '24h',
+      severity: 'all',
+      dataType: 'all',
+      timeOffsetMs: null,
+      playing: false,
+    }),
 }));
